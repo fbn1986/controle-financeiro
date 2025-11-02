@@ -774,6 +774,108 @@
             }
         }
 
+        // NOVO: Funções de renderização que estavam faltando
+
+        // 1. Renderiza o Resumo (Cards do Topo)
+        function renderSummary() {
+            let totalPrevisto = 0;
+            let totalPago = 0;
+
+            fixedExpensesCache.forEach(expense => {
+                totalPrevisto += expense.estimatedValue;
+                const payment = monthlyPaymentsCache[expense.id];
+                if (payment) {
+                    totalPago += payment.paidValue;
+                }
+            });
+
+            const totalRestante = totalPrevisto - totalPago;
+
+            totalPrevistoEl.textContent = formatCurrency(totalPrevisto);
+            totalPagoEl.textContent = formatCurrency(totalPago);
+            totalRestanteEl.textContent = formatCurrency(totalRestante);
+        }
+
+        // 2. Renderiza o Gráfico de Pizza
+        function renderDashboard() {
+            const ctx = document.getElementById('expense-pie-chart');
+            if (!ctx) return; // Sai se o canvas não existir
+
+            // Pega os dados
+            const labels = fixedExpensesCache.map(e => e.name);
+            const data = fixedExpensesCache.map(e => e.estimatedValue);
+            
+            // Gera cores para o gráfico
+            const backgroundColors = labels.map((_, i) => chartColors[i % chartColors.length]);
+
+            // Destrói o gráfico antigo, se existir
+            if (expenseChart) {
+                expenseChart.destroy();
+            }
+
+            // Cria o novo gráfico
+            expenseChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor Previsto',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. Função principal de renderização
+        function renderApp() {
+            try {
+                if (!userId) return; // Não renderiza se deslogado
+
+                renderSummary();
+                renderDashboard();
+                renderExpenseList();
+                
+                // Renderiza os ícones - MUITO IMPORTANTE
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error("Erro fatal ao renderizar o app:", error);
+                showAlert("Ocorreu um erro crítico ao exibir os dados.", true);
+            }
+        }
+
+
         // Renderiza a lista de contas
         function renderExpenseList() {
             expenseList.innerHTML = ''; 
@@ -924,6 +1026,3 @@
     </script>
 </body>
 </html>
-
-
-
