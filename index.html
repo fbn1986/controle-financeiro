@@ -752,7 +752,8 @@
         // Lança um pagamento para o mês atual
         async function handlePayExpense(expenseId, paidValue) {
             if (isNaN(paidValue) || paidValue <= 0) {
-                showAlert("Por favor, insira um valor de pagamento válido.", true);
+                // Esta verificação agora usa o valor previsto, mas é bom manter
+                showAlert("O valor previsto da conta é inválido.", true);
                 return;
             }
             if (monthlyPaymentsCache[expenseId]) {
@@ -768,7 +769,7 @@
                     status: 'paid',
                     paidAt: Timestamp.now()
                 });
-                showAlert("Pagamento registrado com sucesso!");
+                showAlert("Conta marcada como paga!");
             } catch (error) {
                 showAlert("Erro ao salvar o pagamento.", true);
             }
@@ -818,12 +819,12 @@
                 let paymentHtml = '';
                 if (isPaid) {
                     paymentHtml = `
-                        <div class="flex-shrink-0 text-right w-full md:w-auto">
+                        <div class="flex-shrink-0 text-right w-full md:w-auto space-y-2">
                             <div class="flex items-center justify-end text-green-700">
                                 <i data-lucide="check-circle" class="mr-2 h-5 w-5"></i>
                                 <span class="font-semibold">Pago: ${formatCurrency(payment.paidValue)}</span>
                             </div>
-                             <button data-action="undo" data-payment-id="${payment.id}" class="text-xs text-blue-600 hover:underline mt-1">Desfazer</button>
+                             <button data-action="undo" data-payment-id="${payment.id}" class="w-full text-xs text-blue-600 hover:underline">Marcar como Pendente</button>
                         </div>
                     `;
                 } else {
@@ -831,15 +832,14 @@
                     if (isFutureMonth) {
                          paymentHtml = `<p class="text-sm text-gray-500 text-right w-full md:w-auto">Pagamento disponível em ${getMonthYearName(selectedDate)}.</p>`;
                     } else {
+                        // NOVO: Botão simples para marcar como pago
                         paymentHtml = `
-                            <form data-action="pay" data-expense-id="${expense.id}" class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                                <input 
-                                class="pay-value-input px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full sm:w-32"
-                            >
-                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
-                                    Pagar
+                            <div class="w-full md:w-auto">
+                                <button data-action="pay" data-expense-id="${expense.id}" data-estimated-value="${expense.estimatedValue}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
+                                    <i data-lucide="check" class="mr-1 h-4 w-4"></i>
+                                    Marcar como Pago
                                 </button>
-                            </form>
+                            </div>
                         `;
                     }
                 }
@@ -893,11 +893,12 @@
             if (!target) return;
             const action = target.dataset.action;
 
-            if (target.tagName === 'FORM' && action === 'pay') {
+            // MODIFICADO: Não é mais um formulário
+            if (target.tagName === 'BUTTON' && action === 'pay') {
                 e.preventDefault();
                 const expenseId = target.dataset.expenseId;
-                const paidValue = parseFloat(target.querySelector('.pay-value-input').value);
-                handlePayExpense(expenseId, paidValue);
+                const estimatedValue = parseFloat(target.dataset.estimatedValue); // Pega o valor previsto do botão
+                handlePayExpense(expenseId, estimatedValue);
             }
             if (target.tagName === 'BUTTON' && action === 'delete') {
                 const expenseId = target.dataset.expenseId;
@@ -924,4 +925,5 @@
     </script>
 </body>
 </html>
+
 
