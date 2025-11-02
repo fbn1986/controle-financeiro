@@ -17,7 +17,6 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Estilo para o spinner de carregamento */
         .loader {
             border-top-color: #3498db;
             -webkit-animation: spinner 1.5s linear infinite;
@@ -35,20 +34,85 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <!-- Container Principal -->
-    <div class="container mx-auto max-w-4xl p-4 md:p-8">
+    <!-- Spinner de Carregamento Principal -->
+    <div id="loading-spinner" class="flex justify-center items-center h-screen">
+        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
+    </div>
+
+    <!-- Container de Autenticação (Login/Registro) -->
+    <div id="auth-container" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl border border-gray-200">
+            
+            <!-- Formulário de Login (inicialmente visível) -->
+            <form id="login-form">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
+                <div id="login-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="login-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="login-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center mt-6">
+                    Entrar
+                </button>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    Não tem uma conta? 
+                    <button type="button" id="show-register" class="font-medium text-blue-600 hover:underline">Registre-se</button>
+                </p>
+            </form>
+
+            <!-- Formulário de Registro (inicialmente oculto) -->
+            <form id="register-form" class="hidden">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Criar Conta</h2>
+                <div id="register-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="register-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="register-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="register-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="register-confirm-password" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                        <input type="password" id="register-confirm-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center mt-6">
+                    Criar Conta
+                </button>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    Já tem uma conta? 
+                    <button type="button" id="show-login" class="font-medium text-blue-600 hover:underline">Faça Login</button>
+                </p>
+            </form>
+
+        </div>
+    </div>
+    
+    <!-- Container Principal do Aplicativo (Oculto até o login) -->
+    <main id="app-container" class="hidden container mx-auto max-w-4xl p-4 md:p-8">
         <header class="mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 text-center">Meu Controle Financeiro</h1>
-            <p class="text-center text-gray-600 text-sm mt-2">Usuário: <span id="user-id-display" class="font-mono bg-gray-200 px-2 py-1 rounded">Carregando...</span></p>
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h1 class="text-4xl font-bold text-gray-800 text-left">Meu Controle</h1>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <p class="text-gray-600 text-sm">Usuário: <span id="user-email-display" class="font-mono bg-gray-200 px-2 py-1 rounded">...</span></p>
+                    <button id="logout-button" class="bg-red-500 text-white px-3 py-2 rounded-lg shadow-md font-semibold hover:bg-red-600 transition duration-200 flex items-center justify-center text-sm">
+                        <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
+                        Sair
+                    </button>
+                </div>
+            </div>
         </header>
 
-        <!-- Spinner de Carregamento Principal -->
-        <div id="loading-spinner" class="flex justify-center items-center h-64">
-            <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
-        </div>
-
-        <!-- Conteúdo do Aplicativo (oculto até carregar) -->
-        <main id="app-content" class="hidden">
+        <!-- Conteúdo do Aplicativo -->
+        <div id="app-content">
             
             <!-- Seção de Resumo -->
             <section id="summary-section" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -96,8 +160,8 @@
                 </div>
             </section>
 
-        </main>
-    </div>
+        </div>
+    </main>
 
     <!-- Modal de Alerta Customizado (substituto do alert()) -->
     <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
@@ -124,10 +188,12 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, 
-            signInAnonymously, 
             onAuthStateChanged,
             setPersistence,
-            browserLocalPersistence
+            browserLocalPersistence,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { 
             getFirestore, 
@@ -149,10 +215,11 @@
         let fixedExpensesCache = []; // Cache local das contas fixas
         let monthlyPaymentsCache = {}; // Cache local dos pagamentos (mapeado por expenseId)
         
-        // --- Constantes e Helpers ---
-        
-        // !!! IMPORTANTE !!!
-        // Configuração do Firebase preenchida com seus dados
+        // Listeners do Firestore (para podermos "desligar" no logout)
+        let expensesListener = null;
+        let paymentsListener = null;
+
+        // --- Configuração do Firebase (Suas Chaves) ---
         const firebaseConfig = {
           apiKey: "AIzaSyCkhSVSUsdhWL1SJi6fs2jkZDvWiFZ5zkw",
           authDomain: "meu-controle-financeiro-86f94.firebaseapp.com",
@@ -161,18 +228,27 @@
           messagingSenderId: "688021518065",
           appId: "1:688021518065:web:c703e1549bfdfeb7995b50"
         };
-        // !!! IMPORTANTE !!!
-
         
+        // --- Elementos da UI ---
         const loadingSpinner = document.getElementById('loading-spinner');
-        const appContent = document.getElementById('app-content');
-        const userIdDisplay = document.getElementById('user-id-display');
-
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        
+        // Forms de Auth
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showLoginBtn = document.getElementById('show-login');
+        const showRegisterBtn = document.getElementById('show-register');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
+        
+        // App Principal
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const logoutButton = document.getElementById('logout-button');
         const addExpenseForm = document.getElementById('add-expense-form');
         const expenseNameInput = document.getElementById('expense-name');
         const expenseValueInput = document.getElementById('expense-value');
         const expenseList = document.getElementById('expense-list');
-
         const totalPrevistoEl = document.getElementById('total-previsto');
         const totalPagoEl = document.getElementById('total-pago');
         const totalRestanteEl = document.getElementById('total-restante');
@@ -191,7 +267,7 @@
             setTimeout(() => alertModal.classList.add('hidden'), 150);
         });
 
-        // Função para mostrar o modal de alerta customizado
+        // --- Funções de Alerta ---
         function showAlert(message, isError = false) {
             alertTitle.textContent = isError ? 'Erro!' : 'Sucesso!';
             alertMessage.textContent = message;
@@ -205,135 +281,204 @@
                 alertCloseBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
                 alertCloseBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
             }
-            
-            // Renderiza o ícone do Lucide
             lucide.createIcons();
-
             alertModal.classList.remove('hidden');
-            // Pequeno delay para a animação de entrada
             setTimeout(() => {
                 alertModalContent.classList.remove('scale-95', 'opacity-0');
             }, 50);
         }
 
-        // --- Funções Auxiliares ---
+        // Mostra erros nos formulários de login/registro
+        function showAuthError(type, message) {
+            const el = (type === 'login') ? loginError : registerError;
+            el.textContent = message;
+            el.classList.remove('hidden');
+        }
+        
+        // Limpa erros
+        function clearAuthErrors() {
+            loginError.classList.add('hidden');
+            registerError.classList.add('hidden');
+        }
 
-        // Retorna o mês e ano atual no formato "MM-YYYY"
+        // --- Funções Auxiliares ---
         function getCurrentMonthYear() {
             const now = new Date();
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
             const year = now.getFullYear();
             return `${month}-${year}`;
         }
-        
-        // Retorna o nome do mês e ano por extenso
         function getCurrentMonthYearName() {
             const now = new Date();
             return now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
         }
-
-        // Formata um número para o padrão monetário BRL
         function formatCurrency(value) {
             return parseFloat(value || 0).toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
             });
         }
-
-        // Constrói o caminho da coleção privada do usuário
         function getCollectionPath(collectionName) {
             if (!userId) {
-                console.error("User ID não definido para construir o caminho do Firestore.");
+                console.error("User ID não definido.");
                 return null;
             }
-            // Caminho simplificado para o seu banco de dados pessoal
             return `users/${userId}/${collectionName}`;
         }
 
         // --- Inicialização do Firebase ---
-
         async function initializeFirebase() {
             try {
-                // Verifica se as chaves foram preenchidas (essa verificação agora deve passar)
-                if (firebaseConfig.apiKey === "COLE_SUA_API_KEY_AQUI") {
-                    showAlert("Erro de Configuração: As chaves do Firebase não foram preenchidas no arquivo HTML.", true);
-                    loadingSpinner.innerHTML = `<p class="text-red-500 text-center p-4"><b>Erro:</b> Você precisa editar este arquivo e preencher o objeto 'firebaseConfig' com suas chaves do Firebase.</p>`;
-                    return;
-                }
-                
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                setLogLevel('debug'); // Habilita logs detalhados do Firestore
-
-                // Configura a persistência de autenticação
+                setLogLevel('debug'); 
                 await setPersistence(auth, browserLocalPersistence);
-
                 setupAuthListener();
             } catch (error) {
                 console.error("Erro inicializando o Firebase:", error);
-                showAlert("Não foi possível conectar ao serviço. Verifique sua conexão e configuração.", true);
                 loadingSpinner.innerHTML = `<p class="text-red-500">Erro ao carregar. Tente recarregar a página.</p>`;
             }
         }
 
-        // --- Autenticação ---
-
+        // --- Gerenciamento de Autenticação ---
         function setupAuthListener() {
-            onAuthStateChanged(auth, async (user) => {
+            onAuthStateChanged(auth, (user) => {
+                loadingSpinner.classList.add('hidden'); // Esconde o spinner principal
+                
                 if (user) {
-                    // Usuário já está logado
+                    // Usuário está logado
                     userId = user.uid;
-                    await onUserAuthenticated();
+                    userEmailDisplay.textContent = user.email;
+                    currentMonthEl.textContent = getCurrentMonthYearName();
+                    
+                    authContainer.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    
+                    loadData(); // Carrega os dados do usuário
+                    lucide.createIcons(); // Renderiza ícones do app
                 } else {
-                    // Se não há usuário, tenta logar anonimamente
-                    try {
-                        await signInAnonymously(auth);
-                        // O 'onAuthStateChanged' será disparado novamente com o usuário logado
-                    } catch (error) {
-                        console.error("Erro ao autenticar anonimamente:", error);
-                        showAlert("Erro de autenticação. Não será possível salvar seus dados.", true);
-                        loadingSpinner.classList.add('hidden');
-                    }
+                    // Usuário está deslogado
+                    userId = null;
+                    authContainer.classList.remove('hidden');
+                    appContainer.classList.add('hidden');
+                    
+                    detachDataListeners(); // Para de ouvir dados antigos
+                    clearLocalCache(); // Limpa dados da tela
+                    lucide.createIcons(); // Renderiza ícones do auth
                 }
             });
         }
-
-        // Chamado quando o usuário está autenticado
-        async function onUserAuthenticated() {
-            console.log("Usuário anônimo autenticado:", userId);
-            userIdDisplay.textContent = userId;
-            currentMonthEl.textContent = getCurrentMonthYearName();
-
-            // Carrega os dados e exibe o app
-            await loadData();
+        
+        // Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAuthErrors();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
             
-            loadingSpinner.classList.add('hidden');
-            appContent.classList.remove('hidden');
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged vai cuidar de mostrar o app
+            } catch (error) {
+                console.error("Erro de login:", error.code);
+                showAuthError('login', 'Email ou senha inválidos.');
+            }
+        });
+        
+        // Registro
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAuthErrors();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                showAuthError('register', 'As senhas não conferem.');
+                return;
+            }
             
-            // Re-renderiza os ícones do Lucide
-            lucide.createIcons();
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged vai cuidar de mostrar o app
+            } catch (error)
+ {
+                console.error("Erro de registro:", error.code);
+                if (error.code === 'auth/email-already-in-use') {
+                    showAuthError('register', 'Este email já está em uso.');
+                } else if (error.code === 'auth/weak-password') {
+                    showAuthError('register', 'A senha deve ter pelo menos 6 caracteres.');
+                } else {
+                    showAuthError('register', 'Erro ao criar conta.');
+                }
+            }
+        });
+
+        // Logout
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                // onAuthStateChanged vai cuidar de mostrar a tela de login
+            } catch (error) {
+                console.error("Erro ao sair:", error);
+                showAlert("Erro ao tentar sair.", true);
+            }
+        });
+
+        // Alternar entre forms de login/registro
+        showRegisterBtn.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            clearAuthErrors();
+        });
+        showLoginBtn.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            clearAuthErrors();
+        });
+        
+        // --- Gerenciamento de Dados (Firestore) ---
+        
+        // Para de ouvir os snapshots
+        function detachDataListeners() {
+            if (expensesListener) {
+                expensesListener(); // Chama a função 'unsubscribe'
+                expensesListener = null;
+                console.log("Listener de Contas Fixas desligado.");
+            }
+            if (paymentsListener) {
+                paymentsListener(); // Chama a função 'unsubscribe'
+                paymentsListener = null;
+                console.log("Listener de Pagamentos desligado.");
+            }
         }
-
-        // --- Lógica do Firestore ---
+        
+        // Limpa os dados locais (chamado no logout)
+        function clearLocalCache() {
+            fixedExpensesCache = [];
+            monthlyPaymentsCache = {};
+            renderApp(); // Renderiza o app (que agora estará vazio)
+        }
 
         // Carrega dados (contas fixas e pagamentos do mês)
         async function loadData() {
             if (!db || !userId) return;
+            
+            // Garante que listeners antigos sejam desligados antes de ligar novos
+            detachDataListeners();
             
             const expensesPath = getCollectionPath('fixedExpenses');
             if (!expensesPath) return;
 
             // 1. Listener para Contas Fixas
             const qExpenses = query(collection(db, expensesPath));
-            
-            onSnapshot(qExpenses, (querySnapshot) => {
+            expensesListener = onSnapshot(qExpenses, (querySnapshot) => {
                 console.log("Snapshot de Contas Fixas recebido.");
                 fixedExpensesCache = [];
                 querySnapshot.forEach((doc) => {
                     fixedExpensesCache.push({ id: doc.id, ...doc.data() });
                 });
-                // Ordena por nome
                 fixedExpensesCache.sort((a, b) => a.name.localeCompare(b.name));
                 renderApp();
             }, (error) => {
@@ -345,8 +490,7 @@
             const paymentsPath = getCollectionPath('monthlyPayments');
             const currentMonth = getCurrentMonthYear();
             const qPayments = query(collection(db, paymentsPath), where("monthYear", "==", currentMonth));
-
-            onSnapshot(qPayments, (querySnapshot) => {
+            paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
                 console.log("Snapshot de Pagamentos recebido.");
                 monthlyPaymentsCache = {};
                 querySnapshot.forEach((doc) => {
@@ -360,8 +504,10 @@
             });
         }
 
+        // --- Lógica do Aplicativo (CRUD) ---
+        
         // Adiciona uma nova conta fixa
-        async function handleAddExpense(e) {
+        addExpenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = expenseNameInput.value.trim();
             const estimatedValue = parseFloat(expenseValueInput.value);
@@ -385,7 +531,7 @@
                 console.error("Erro ao adicionar conta:", error);
                 showAlert("Erro ao salvar a nova conta.", true);
             }
-        }
+        });
 
         // Lança um pagamento para o mês atual
         async function handlePayExpense(expenseId, paidValue) {
@@ -393,13 +539,10 @@
                 showAlert("Por favor, insira um valor de pagamento válido.", true);
                 return;
             }
-
-            // Verifica se já não foi pago
             if (monthlyPaymentsCache[expenseId]) {
                 showAlert("Esta conta já foi paga este mês.", true);
                 return;
             }
-
             try {
                 const paymentsPath = getCollectionPath('monthlyPayments');
                 await addDoc(collection(db, paymentsPath), {
@@ -418,8 +561,6 @@
 
         // Exclui uma conta fixa
         async function handleDeleteExpense(expenseId, expenseName) {
-            console.log(`Solicitando exclusão de: ${expenseName} (ID: ${expenseId})`);
-            
             try {
                 const docPath = doc(db, getCollectionPath('fixedExpenses'), expenseId);
                 await deleteDoc(docPath);
@@ -446,15 +587,14 @@
             }
         }
 
-
         // --- Renderização da UI ---
 
         // Renderiza o app (lista e resumo) com base nos caches
         function renderApp() {
-            if (!appContent.classList.contains('hidden')) {
+            // Só renderiza se o app estiver visível
+            if (!appContainer.classList.contains('hidden')) {
                 renderExpenseList();
                 updateSummary();
-                // Re-renderiza os ícones do Lucide
                 lucide.createIcons();
             }
         }
@@ -466,7 +606,6 @@
 
             fixedExpensesCache.forEach(expense => {
                 totalPrevisto += expense.estimatedValue;
-                
                 const payment = monthlyPaymentsCache[expense.id];
                 if (payment) {
                     totalPago += payment.paidValue;
@@ -474,12 +613,9 @@
             });
 
             const totalRestante = totalPrevisto - totalPago;
-
             totalPrevistoEl.textContent = formatCurrency(totalPrevisto);
             totalPagoEl.textContent = formatCurrency(totalPago);
             totalRestanteEl.textContent = formatCurrency(totalRestante);
-            
-            // Atualiza cor do restante
             totalRestanteEl.classList.toggle('text-red-600', totalRestante > 0);
             totalRestanteEl.classList.toggle('text-green-600', totalRestante <= 0);
         }
@@ -502,7 +638,6 @@
                 
                 let paymentHtml = '';
                 if (isPaid) {
-                    // Se estiver PAGO
                     paymentHtml = `
                         <div class="flex-shrink-0 text-right w-full md:w-auto">
                             <div class="flex items-center justify-end text-green-700">
@@ -513,7 +648,6 @@
                         </div>
                     `;
                 } else {
-                    // Se estiver PENDENTE
                     paymentHtml = `
                         <form data-action="pay" data-expense-id="${expense.id}" class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                             <input 
@@ -541,30 +675,23 @@
                         </div>
                         <p class="text-sm text-gray-600">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
                     </div>
-                    
                     <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-200">
                         ${paymentHtml}
                     </div>
-                    
                     <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="text-gray-400 hover:text-red-500 transition-colors hidden md:block">
                         <i data-lucide="trash-2" class="h-5 w-5"></i>
                     </button>
                 `;
-                
                 expenseList.appendChild(card);
             });
         }
         
         // --- Listeners de Eventos da UI ---
         
-        // Listener para adicionar conta
-        addExpenseForm.addEventListener('submit', handleAddExpense);
-
         // Listener de eventos na lista de contas (para botões de Pagar e Excluir)
         expenseList.addEventListener('click', (e) => {
             const target = e.target.closest('button, form');
             if (!target) return;
-
             const action = target.dataset.action;
 
             if (target.tagName === 'FORM' && action === 'pay') {
@@ -573,14 +700,11 @@
                 const paidValue = parseFloat(target.querySelector('.pay-value-input').value);
                 handlePayExpense(expenseId, paidValue);
             }
-            
             if (target.tagName === 'BUTTON' && action === 'delete') {
                 const expenseId = target.dataset.expenseId;
                 const expenseName = target.dataset.expenseName;
-                // Idealmente, usaríamos um modal de confirmação.
                 handleDeleteExpense(expenseId, expenseName);
             }
-            
             if (target.tagName === 'BUTTON' && action === 'undo') {
                 const paymentId = target.dataset.paymentId;
                 handleUndoPayment(paymentId);
@@ -593,4 +717,3 @@
     </script>
 </body>
 </html>
-
