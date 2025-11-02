@@ -6,9 +6,10 @@
     <title>Controle Financeiro Pessoal</title>
     <!-- Carrega o Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carrega os ícones do Lucide -->
-    <script type="module" src="https://unpkg.com/lucide-react@latest/dist/lucide-react.js"></script>
+    <!-- Carrega os ícones do Lucide (CORRIGIDO - removi o script quebrado do lucide-react) -->
     <script src="https://unpkg.com/lucide-icons@latest/dist/lucide.min.js"></script>
+    <!-- Carrega o Chart.js (NOVO) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Estilo da fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,13 +23,9 @@
             -webkit-animation: spinner 1.5s linear infinite;
             animation: spinner 1.5s linear infinite;
         }
-        @-webkit-keyframes spinner {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
-        }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Garante que o gráfico não fique gigante */
+        #dashboard-section canvas {
+            max-height: 400px;
         }
     </style>
 </head>
@@ -130,10 +127,18 @@
                 </div>
             </section>
 
+            <!-- NOVO: Seção do Dashboard (Gráfico) -->
+            <section id="dashboard-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-semibold mb-4">Composição das Despesas</h2>
+                <div class="relative h-64 md:h-80">
+                    <canvas id="expense-pie-chart"></canvas>
+                </div>
+            </section>
+
             <!-- Seção para Adicionar Nova Conta Fixa -->
             <section id="add-expense-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                 <h2 class="text-2xl font-semibold mb-4">Adicionar Nova Conta Fixa</h2>
-                <form id="add-expense-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <form id="add-expense-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div class="md:col-span-1">
                         <label for="expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
                         <input type="text" id="expense-name" placeholder="Ex: Aluguel, Luz, Internet" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -141,6 +146,11 @@
                     <div class="md:col-span-1">
                         <label for="expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
                         <input type="number" id="expense-value" step="0.01" placeholder="150.00" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <!-- NOVO: Campo Dia do Vencimento -->
+                    <div class="md:col-span-1">
+                        <label for="expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</label>
+                        <input type="number" id="expense-due-date" min="1" max="31" placeholder="Ex: 10" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="md:col-span-1">
                         <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center">
@@ -153,7 +163,19 @@
 
             <!-- Seção da Lista de Contas -->
             <section id="expense-list-section">
-                <h2 class="text-2xl font-semibold mb-4">Minhas Contas Fixas (Mês: <span id="current-month"></span>)</h2>
+                <!-- NOVO: Navegação de Mês -->
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Minhas Contas</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="prev-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
+                            <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                        </button>
+                        <span id="current-month" class="font-semibold text-lg text-gray-700 w-36 text-center"></span>
+                        <button id="next-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
+                            <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+                </div>
                 <div id="expense-list" class="space-y-4">
                     <!-- Contas serão injetadas aqui pelo JavaScript -->
                     <p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>
@@ -178,6 +200,38 @@
             <button id="alert-close-btn" class="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
                 Fechar
             </button>
+        </div>
+    </div>
+
+    <!-- NOVO: Modal de Edição -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-md w-full p-6 rounded-xl shadow-2xl transform transition-all scale-95 opacity-0" id="edit-modal-content">
+            <h3 class="text-2xl font-semibold mb-6">Editar Conta Fixa</h3>
+            <form id="edit-expense-form">
+                <input type="hidden" id="edit-expense-id">
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
+                        <input type="text" id="edit-expense-name" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit-expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
+                        <input type="number" id="edit-expense-value" step="0.01" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit-expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</dlabel>
+                        <input type="number" id="edit-expense-due-date" min="1" max="31" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-4">
+                    <button type="button" id="edit-cancel-btn" class="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:outline-none">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -207,14 +261,24 @@
             query, 
             where, 
             Timestamp,
+            writeBatch, // NOVO: Para dados iniciais
             setLogLevel
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // --- Variáveis Globais do Firebase ---
         let db, auth, userId;
         let fixedExpensesCache = []; // Cache local das contas fixas
         let monthlyPaymentsCache = {}; // Cache local dos pagamentos (mapeado por expenseId)
         
+        // NOVO: Variáveis de estado do App
+        let selectedDate = new Date(); // Controla o mês/ano selecionado
+        let expenseChart = null; // Instância do Chart.js
+        let isFirstLoad = true; // Para carregar dados iniciais
+        const chartColors = [ // Cores para o gráfico
+            '#3B82F6', '#10B981', '#EF4444', '#EAB308', '#8B5CF6', '#F97316',
+            '#EC4899', '#6366F1', '#14B8A6', '#F59E0B', '#D946EF', '#0EA5E9'
+        ];
+
         // Listeners do Firestore (para podermos "desligar" no logout)
         let expensesListener = null;
         let paymentsListener = null;
@@ -248,11 +312,14 @@
         const addExpenseForm = document.getElementById('add-expense-form');
         const expenseNameInput = document.getElementById('expense-name');
         const expenseValueInput = document.getElementById('expense-value');
+        const expenseDueDateInput = document.getElementById('expense-due-date'); // NOVO
         const expenseList = document.getElementById('expense-list');
         const totalPrevistoEl = document.getElementById('total-previsto');
         const totalPagoEl = document.getElementById('total-pago');
         const totalRestanteEl = document.getElementById('total-restante');
         const currentMonthEl = document.getElementById('current-month');
+        const prevMonthBtn = document.getElementById('prev-month-btn'); // NOVO
+        const nextMonthBtn = document.getElementById('next-month-btn'); // NOVO
         
         // Modal de Alerta
         const alertModal = document.getElementById('alert-modal');
@@ -262,10 +329,43 @@
         const alertIconContainer = document.getElementById('alert-icon-container');
         const alertCloseBtn = document.getElementById('alert-close-btn');
 
+        // NOVO: Elementos do Modal de Edição
+        const editModal = document.getElementById('edit-modal');
+        const editModalContent = document.getElementById('edit-modal-content');
+        const editExpenseForm = document.getElementById('edit-expense-form');
+        const editExpenseId = document.getElementById('edit-expense-id');
+        const editExpenseName = document.getElementById('edit-expense-name');
+        const editExpenseValue = document.getElementById('edit-expense-value');
+        const editExpenseDueDate = document.getElementById('edit-expense-due-date');
+        const editCancelBtn = document.getElementById('edit-cancel-btn');
+
         alertCloseBtn.addEventListener('click', () => {
             alertModalContent.classList.add('scale-95', 'opacity-0');
             setTimeout(() => alertModal.classList.add('hidden'), 150);
         });
+
+        // NOVO: Funções do Modal de Edição
+        function openEditModal(expense) {
+            editExpenseId.value = expense.id;
+            editExpenseName.value = expense.name;
+            editExpenseValue.value = expense.estimatedValue;
+            editExpenseDueDate.value = expense.dueDate || ''; // Pega o dueDate
+            
+            editModal.classList.remove('hidden');
+            setTimeout(() => {
+                editModalContent.classList.remove('scale-95', 'opacity-0');
+            }, 50);
+        }
+
+        function closeEditModal() {
+            editModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                editModal.classList.add('hidden');
+                editExpenseForm.reset(); // Limpa o formulário
+            }, 150);
+        }
+
+        editCancelBtn.addEventListener('click', closeEditModal);
 
         // --- Funções de Alerta ---
         function showAlert(message, isError = false) {
@@ -302,15 +402,15 @@
         }
 
         // --- Funções Auxiliares ---
-        function getCurrentMonthYear() {
-            const now = new Date();
-            const month = (now.getMonth() + 1).toString().padStart(2, '0');
-            const year = now.getFullYear();
+        // MODIFICADO: Retorna o MM-YYYY da data selecionada
+        function getMonthYear(date) {
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
             return `${month}-${year}`;
         }
-        function getCurrentMonthYearName() {
-            const now = new Date();
-            return now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+        // MODIFICADO: Retorna o nome do mês da data selecionada
+        function getMonthYearName(date) {
+            return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
         }
         function formatCurrency(value) {
             return parseFloat(value || 0).toLocaleString('pt-BR', {
@@ -349,10 +449,11 @@
                 if (user) {
                     // Usuário está logado
                     userId = user.uid;
-                    userEmailDisplay.textContent = user.email;
-                    currentMonthEl.textContent = getCurrentMonthYearName();
-                    
-                    authContainer.classList.add('hidden');
+                userEmailDisplay.textContent = user.email;
+                // MODIFICADO: Atualiza o display do mês
+                currentMonthEl.textContent = getMonthYearName(selectedDate);
+                
+                authContainer.classList.add('hidden');
                     appContainer.classList.remove('hidden');
                     
                     loadData(); // Carrega os dados do usuário
@@ -360,13 +461,15 @@
                 } else {
                     // Usuário está deslogado
                     userId = null;
-                    authContainer.classList.remove('hidden');
-                    appContainer.classList.add('hidden');
-                    
-                    detachDataListeners(); // Para de ouvir dados antigos
-                    clearLocalCache(); // Limpa dados da tela
-                    lucide.createIcons(); // Renderiza ícones do auth
-                }
+                authContainer.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                
+                detachDataListeners(); // Para de ouvir dados antigos
+                clearLocalCache(); // Limpa dados da tela
+                lucide.createIcons(); // Renderiza ícones do auth
+            }
+        });
+    }
             });
         }
         
@@ -458,6 +561,8 @@
         function clearLocalCache() {
             fixedExpensesCache = [];
             monthlyPaymentsCache = {};
+            selectedDate = new Date(); // Reseta a data
+            isFirstLoad = true; // Permite carregar dados iniciais para o próximo login
             renderApp(); // Renderiza o app (que agora estará vazio)
         }
 
@@ -479,7 +584,14 @@
                 querySnapshot.forEach((doc) => {
                     fixedExpensesCache.push({ id: doc.id, ...doc.data() });
                 });
-                fixedExpensesCache.sort((a, b) => a.name.localeCompare(b.name));
+                
+                // NOVO: Adiciona contas predefinidas se for o primeiro acesso e não houver contas
+                if (querySnapshot.empty && isFirstLoad) {
+                    addPredefinedExpenses();
+                }
+                isFirstLoad = false; // Garante que só rode uma vez
+
+                fixedExpensesCache.sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
                 renderApp();
             }, (error) => {
                 console.error("Erro ao ouvir contas fixas: ", error);
@@ -488,7 +600,8 @@
 
             // 2. Listener para Pagamentos do Mês Atual
             const paymentsPath = getCollectionPath('monthlyPayments');
-            const currentMonth = getCurrentMonthYear();
+            // MODIFICADO: Usa a data selecionada (selectedDate)
+            const currentMonth = getMonthYear(selectedDate);
             const qPayments = query(collection(db, paymentsPath), where("monthYear", "==", currentMonth));
             paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
                 console.log("Snapshot de Pagamentos recebido.");
@@ -511,9 +624,15 @@
             e.preventDefault();
             const name = expenseNameInput.value.trim();
             const estimatedValue = parseFloat(expenseValueInput.value);
+            const dueDate = parseInt(expenseDueDateInput.value); // NOVO
 
             if (!name || isNaN(estimatedValue) || estimatedValue <= 0) {
                 showAlert("Por favor, preencha o nome e um valor válido.", true);
+                return;
+            }
+
+            if (isNaN(dueDate) || dueDate < 1 || dueDate > 31) {
+                showAlert("Por favor, insira um dia de vencimento válido (1-31).", true);
                 return;
             }
 
@@ -522,6 +641,7 @@
                 await addDoc(collection(db, expensesPath), {
                     name: name,
                     estimatedValue: estimatedValue,
+                    dueDate: dueDate, // NOVO
                     createdAt: Timestamp.now()
                 });
                 
@@ -533,10 +653,46 @@
             }
         });
 
+        // NOVO: Adiciona contas predefinidas (chamado uma vez)
+        async function addPredefinedExpenses() {
+            const expensesPath = getCollectionPath('fixedExpenses');
+            const batch = writeBatch(db);
+
+            const predefined = [
+                { name: "Internet", estimatedValue: 100, dueDate: 10 },
+                { name: "Luz", estimatedValue: 150, dueDate: 15 },
+                { name: "Gás", estimatedValue: 80, dueDate: 5 },
+                { name: "Celular", estimatedValue: 50, dueDate: 20 },
+                { name: "IPTU", estimatedValue: 120, dueDate: 10 },
+                { name: "Canva", estimatedValue: 35, dueDate: 25 },
+            ];
+
+            predefined.forEach(expense => {
+                const docRef = doc(collection(db, expensesPath)); // Cria uma nova ref
+                batch.set(docRef, { ...expense, createdAt: Timestamp.now() });
+            });
+
+            try {
+                await batch.commit();
+                console.log("Contas predefinidas adicionadas!");
+            } catch (error) {
+                console.error("Erro ao adicionar contas predefinidas: ", error);
+            }
+        }
+
         // Lança um pagamento para o mês atual
-        async function handlePayExpense(expenseId, paidValue) {
+        // MODIFICADO: Alterado para "Marcar como Pago"
+        async function handlePayExpense(expenseId) {
+            // Pega o valor previsto do cache
+            const expense = fixedExpensesCache.find(e => e.id === expenseId);
+            if (!expense) {
+                showAlert("Conta não encontrada.", true);
+                return;
+            }
+            const paidValue = expense.estimatedValue; // Usa o valor previsto
+
             if (isNaN(paidValue) || paidValue <= 0) {
-                showAlert("Por favor, insira um valor de pagamento válido.", true);
+                showAlert("O valor previsto da conta é inválido.", true);
                 return;
             }
             if (monthlyPaymentsCache[expenseId]) {
@@ -548,11 +704,11 @@
                 await addDoc(collection(db, paymentsPath), {
                     expenseId: expenseId,
                     paidValue: paidValue,
-                    monthYear: getCurrentMonthYear(),
+                    monthYear: getMonthYear(selectedDate), // MODIFICADO: Usa o mês selecionado
                     status: 'paid',
                     paidAt: Timestamp.now()
                 });
-                showAlert("Pagamento registrado com sucesso!");
+                showAlert("Conta marcada como paga!");
             } catch (error) {
                 console.error("Erro ao registrar pagamento:", error);
                 showAlert("Erro ao salvar o pagamento.", true);
@@ -571,6 +727,35 @@
             }
         }
         
+        // NOVO: Edita uma conta fixa
+        editExpenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = editExpenseId.value;
+            const name = editExpenseName.value.trim();
+            const estimatedValue = parseFloat(editExpenseValue.value);
+            const dueDate = parseInt(editExpenseDueDate.value);
+
+            if (!id || !name || isNaN(estimatedValue) || estimatedValue <= 0 || isNaN(dueDate) || dueDate < 1 || dueDate > 31) {
+                showAlert("Por favor, preencha todos os campos corretamente.", true);
+                return;
+            }
+
+            try {
+                const docPath = doc(db, getCollectionPath('fixedExpenses'), id);
+                await setDoc(docPath, {
+                    name: name,
+                    estimatedValue: estimatedValue,
+                    dueDate: dueDate,
+                }, { merge: true }); // Merge: true preserva o 'createdAt'
+
+                showAlert(`Conta "${name}" atualizada com sucesso!`);
+                closeEditModal();
+            } catch (error) {
+                console.error("Erro ao editar conta:", error);
+                showAlert("Erro ao salvar as alterações.", true);
+            }
+        });
+
         // Desfaz um pagamento (exclui o registro de pagamento)
         async function handleUndoPayment(paymentId) {
              if (!paymentId) {
@@ -595,6 +780,7 @@
             if (!appContainer.classList.contains('hidden')) {
                 renderExpenseList();
                 updateSummary();
+                renderDashboard(); // NOVO: Chama o render do gráfico
                 lucide.createIcons();
             }
         }
@@ -620,6 +806,65 @@
             totalRestanteEl.classList.toggle('text-green-600', totalRestante <= 0);
         }
 
+        // NOVO: Renderiza o Gráfico de Pizza
+        function renderDashboard() {
+            const ctx = document.getElementById('expense-pie-chart');
+            if (!ctx) return; 
+
+            const labels = fixedExpensesCache.map(e => e.name);
+            const data = fixedExpensesCache.map(e => e.estimatedValue);
+            
+            const backgroundColors = labels.map((_, i) => chartColors[i % chartColors.length]);
+
+            // Destrói o gráfico antigo, se existir
+            if (expenseChart) {
+                expenseChart.destroy();
+            }
+
+            // Cria o novo gráfico
+            expenseChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor Previsto',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 2,
+                        borderColor: '#f9fafb' // bg-gray-50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         // Renderiza a lista de contas
         function renderExpenseList() {
             expenseList.innerHTML = ''; // Limpa a lista
@@ -633,54 +878,76 @@
                 const payment = monthlyPaymentsCache[expense.id];
                 const isPaid = !!payment;
 
+                // NOVO: Lógica de Status
+                const today = new Date();
+                const currentDay = today.getDate();
+                const isCurrentMonth = selectedDate.getMonth() === today.getMonth() && selectedDate.getFullYear() === today.getFullYear();
+                const isFutureMonth = selectedDate > today;
+                
+                let status = 'Pendente';
+                let statusColor = 'bg-gray-500 text-gray-100'; // Pendente
+                
+                if (isPaid) {
+                    status = 'Pago';
+                    statusColor = 'bg-green-600 text-green-100'; // Pago
+                } else if (isCurrentMonth && expense.dueDate < currentDay) {
+                    status = 'Atrasado';
+                    statusColor = 'bg-red-600 text-red-100'; // Atrasado
+                }
+
                 const card = document.createElement('div');
-                card.className = `bg-white p-4 rounded-lg shadow-md border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isPaid ? 'border-green-300 bg-green-50' : 'border-gray-200'}`;
+                card.className = `bg-white p-4 rounded-lg shadow-md border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isPaid ? 'border-green-300 bg-green-50 opacity-90' : 'border-gray-200'}`;
                 
                 let paymentHtml = '';
                 if (isPaid) {
                     paymentHtml = `
-                        <div class="flex-shrink-0 text-right w-full md:w-auto">
+                        <div class="flex-shrink-0 text-right w-full md:w-auto space-y-2">
                             <div class="flex items-center justify-end text-green-700">
                                 <i data-lucide="check-circle" class="mr-2 h-5 w-5"></i>
                                 <span class="font-semibold">Pago: ${formatCurrency(payment.paidValue)}</span>
                             </div>
-                             <button data-action="undo" data-payment-id="${payment.id}" class="text-xs text-blue-600 hover:underline mt-1">Desfazer</button>
+                             <button data-action="undo" data-payment-id="${payment.id}" class="w-full text-xs text-blue-600 hover:underline">Marcar como Pendente</button>
                         </div>
                     `;
                 } else {
-                    paymentHtml = `
-                        <form data-action="pay" data-expense-id="${expense.id}" class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                            <input 
-                                type="number" 
-                                step="0.01"
-                                placeholder="Valor Pago" 
-                                value="${expense.estimatedValue.toFixed(2)}"
-                                class="pay-value-input px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full sm:w-32"
-                            >
-                            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
-                                <i data-lucide="dollar-sign" class="mr-1 h-4 w-4"></i>
-                                Pagar
-                            </button>
-                        </form>
-                    `;
+                    // NOVO: Esconde o botão de pagar em meses futuros
+                    if (isFutureMonth) {
+                         paymentHtml = `<p class="text-sm text-gray-500 text-right w-full md:w-auto">Pagamento disponível em ${getMonthYearName(selectedDate)}.</p>`;
+                    } else {
+                        // NOVO: Botão simples para marcar como pago
+                        paymentHtml = `
+                            <div class="w-full md:w-auto">
+                                <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
+                                    <i data-lucide="check" class="mr-1 h-4 w-4"></i>
+                                    Marcar como Pago
+                                </button>
+                            </div>
+                        `;
+                    }
                 }
 
                 card.innerHTML = `
                     <div class="flex-1 w-full md:w-auto">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-4">
                             <h3 class="text-lg font-semibold text-gray-800">${expense.name}</h3>
-                            <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="ml-4 text-gray-400 hover:text-red-500 transition-colors md:hidden">
-                                <i data-lucide="trash-2" class="h-5 w-5"></i>
-                            </button>
+                            <!-- NOVO: Status Badge -->
+                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}">${status}</span>
                         </div>
-                        <p class="text-sm text-gray-600">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
+                        <p class="text-sm text-gray-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
+                        <p class="text-sm text-gray-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
                     </div>
                     <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-200">
                         ${paymentHtml}
                     </div>
-                    <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="text-gray-400 hover:text-red-500 transition-colors hidden md:block">
-                        <i data-lucide="trash-2" class="h-5 w-5"></i>
-                    </button>
+                    <!-- NOVO: Botões de Ação (Editar e Excluir) -->
+                    <div class="flex gap-2 text-gray-400">
+                        <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors">
+                            <i data-lucide="pencil" class="h-5 w-5"></i>
+                        </button>
+                        <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
+                            <i data-lucide="trash-2" class="h-5 w-5"></i>
+                        </button>
+                    </div>
                 `;
                 expenseList.appendChild(card);
             });
@@ -694,11 +961,11 @@
             if (!target) return;
             const action = target.dataset.action;
 
-            if (target.tagName === 'FORM' && action === 'pay') {
+            // MODIFICADO: Não é mais um formulário, é um botão
+            if (target.tagName === 'BUTTON' && action === 'pay') {
                 e.preventDefault();
                 const expenseId = target.dataset.expenseId;
-                const paidValue = parseFloat(target.querySelector('.pay-value-input').value);
-                handlePayExpense(expenseId, paidValue);
+                handlePayExpense(expenseId); // Chama a função modificada
             }
             if (target.tagName === 'BUTTON' && action === 'delete') {
                 const expenseId = target.dataset.expenseId;
@@ -709,6 +976,27 @@
                 const paymentId = target.dataset.paymentId;
                 handleUndoPayment(paymentId);
             }
+            // NOVO: Listener para o botão de editar
+            if (target.tagName === 'BUTTON' && action === 'edit') {
+                const expenseId = target.dataset.expenseId;
+                const expense = fixedExpensesCache.find(e => e.id === expenseId);
+                if (expense) {
+                    openEditModal(expense);
+                }
+            }
+        });
+
+        // NOVO: Listeners dos botões de Mês
+        prevMonthBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() - 1);
+            currentMonthEl.textContent = getMonthYearName(selectedDate);
+            loadData(); // Recarrega os dados para o novo mês
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() + 1);
+            currentMonthEl.textContent = getMonthYearName(selectedDate);
+            loadData(); // Recarrega os dados para o novo mês
         });
 
         // --- Inicialização ---
@@ -717,3 +1005,4 @@
     </script>
 </body>
 </html>
+
