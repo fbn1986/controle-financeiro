@@ -23,6 +23,14 @@
             -webkit-animation: spinner 1.5s linear infinite;
             animation: spinner 1.5s linear infinite;
         }
+        @-webkit-keyframes spinner {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         /* Garante que o gráfico não fique gigante */
         #dashboard-section canvas {
             max-height: 400px;
@@ -249,6 +257,8 @@
             signInWithEmailAndPassword,
             signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // *** CORREÇÃO CRÍTICA ABAIXO ***
+        // O caminho estava errado, impedindo o app de carregar
         import { 
             getFirestore, 
             doc, 
@@ -263,7 +273,7 @@
             Timestamp,
             writeBatch, // NOVO: Para dados iniciais
             setLogLevel
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Variáveis Globais do Firebase ---
         let db, auth, userId;
@@ -449,11 +459,11 @@
                 if (user) {
                     // Usuário está logado
                     userId = user.uid;
-                userEmailDisplay.textContent = user.email;
-                // MODIFICADO: Atualiza o display do mês
-                currentMonthEl.textContent = getMonthYearName(selectedDate);
-                
-                authContainer.classList.add('hidden');
+                    userEmailDisplay.textContent = user.email;
+                    // MODIFICADO: Atualiza o display do mês
+                    currentMonthEl.textContent = getMonthYearName(selectedDate);
+                    
+                    authContainer.classList.add('hidden');
                     appContainer.classList.remove('hidden');
                     
                     loadData(); // Carrega os dados do usuário
@@ -461,15 +471,13 @@
                 } else {
                     // Usuário está deslogado
                     userId = null;
-                authContainer.classList.remove('hidden');
-                appContainer.classList.add('hidden');
-                
-                detachDataListeners(); // Para de ouvir dados antigos
-                clearLocalCache(); // Limpa dados da tela
-                lucide.createIcons(); // Renderiza ícones do auth
-            }
-        });
-    }
+                    authContainer.classList.remove('hidden');
+                    appContainer.classList.add('hidden');
+                    
+                    detachDataListeners(); // Para de ouvir dados antigos
+                    clearLocalCache(); // Limpa dados da tela
+                    lucide.createIcons(); // Renderiza ícones do auth
+                }
             });
         }
         
