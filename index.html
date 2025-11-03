@@ -6,8 +6,16 @@
     <title>Controle Financeiro Pessoal</title>
     <!-- Carrega o Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carrega o script do Lucide (versão correta) -->
-    <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script>
+    <!-- Carrega os ícones do Lucide -->
+    <script type="module">
+    import lucide from "https://unpkg.com/lucide@latest/dist/esm/lucide.js";
+    window.lucide = lucide;
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (window.lucide) lucide.createIcons();
+  });
+</script>
     <!-- Carrega o Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Estilo da fonte Inter -->
@@ -31,16 +39,13 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Garante que o gráfico não fique gigante */
         #dashboard-section canvas {
             max-height: 400px;
         }
-        /* Classe de utilitário para transição de clique */
-        .btn-click {
-            @apply transition-transform duration-150 ease-in-out active:scale-95;
-        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-gray-100 text-gray-900">
 
     <!-- Spinner de Carregamento Principal -->
     <div id="loading-spinner" class="flex justify-center items-center h-screen">
@@ -49,26 +54,26 @@
 
     <!-- Container de Autenticação (Login/Registro) -->
     <div id="auth-container" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl border border-slate-200">
+        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl border border-gray-200">
             
             <!-- Formulário de Login (inicialmente visível) -->
             <form id="login-form">
-                <h2 class="text-3xl font-bold text-center text-slate-800 mb-6">Login</h2>
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
                 <div id="login-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
                 <div class="space-y-4">
                     <div>
-                        <label for="login-email" class="block text-sm font-medium text-slate-700">Email</label>
-                        <input type="email" id="login-email" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="login-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="login-password" class="block text-sm font-medium text-slate-700">Senha</label>
-                        <input type="password" id="login-password" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="login-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 mt-6 btn-click">
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center mt-6">
                     Entrar
                 </button>
-                <p class="text-center text-sm text-slate-600 mt-4">
+                <p class="text-center text-sm text-gray-600 mt-4">
                     Não tem uma conta? 
                     <button type="button" id="show-register" class="font-medium text-blue-600 hover:underline">Registre-se</button>
                 </p>
@@ -76,26 +81,26 @@
 
             <!-- Formulário de Registro (inicialmente oculto) -->
             <form id="register-form" class="hidden">
-                <h2 class="text-3xl font-bold text-center text-slate-800 mb-6">Criar Conta</h2>
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Criar Conta</h2>
                 <div id="register-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
                 <div class="space-y-4">
                     <div>
-                        <label for="register-email" class="block text-sm font-medium text-slate-700">Email</label>
-                        <input type="email" id="register-email" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="register-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="register-password" class="block text-sm font-medium text-slate-700">Senha</label>
-                        <input type="password" id="register-password" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="register-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="register-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="register-confirm-password" class="block text-sm font-medium text-slate-700">Confirmar Senha</label>
-                        <input type="password" id="register-confirm-password" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="register-confirm-password" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                        <input type="password" id="register-confirm-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-green-700 mt-6 btn-click">
+                <button type="submit" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center mt-6">
                     Criar Conta
                 </button>
-                <p class="text-center text-sm text-slate-600 mt-4">
+                <p class="text-center text-sm text-gray-600 mt-4">
                     Já tem uma conta? 
                     <button type="button" id="show-login" class="font-medium text-blue-600 hover:underline">Faça Login</button>
                 </p>
@@ -105,13 +110,13 @@
     </div>
     
     <!-- Container Principal do Aplicativo (Oculto até o login) -->
-    <main id="app-container" class="hidden container mx-auto max-w-5xl p-4 md:p-8">
+    <main id="app-container" class="hidden container mx-auto max-w-4xl p-4 md:p-8">
         <header class="mb-8">
             <div class="flex justify-between items-center flex-wrap gap-4">
-                <h1 class="text-4xl font-bold text-slate-800 text-left">Meu Controle</h1>
+                <h1 class="text-4xl font-bold text-gray-800 text-left">Meu Controle</h1>
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                    <p class="text-slate-600 text-sm">Usuário: <span id="user-email-display" class="font-mono bg-slate-200 px-2 py-1 rounded">...</span></p>
-                    <button id="logout-button" class="bg-red-500 text-white px-3 py-2 rounded-lg shadow-md font-semibold hover:bg-red-600 btn-click flex items-center justify-center text-sm">
+                    <p class="text-gray-600 text-sm">Usuário: <span id="user-email-display" class="font-mono bg-gray-200 px-2 py-1 rounded">...</span></p>
+                    <button id="logout-button" class="bg-red-500 text-white px-3 py-2 rounded-lg shadow-md font-semibold hover:bg-red-600 transition duration-200 flex items-center justify-center text-sm">
                         <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
                         Sair
                     </button>
@@ -122,67 +127,49 @@
         <!-- Conteúdo do Aplicativo -->
         <div id="app-content">
             
-            <!-- Seção de Resumo (COM MELHORIAS VISUAIS) -->
+            <!-- Seção de Resumo -->
             <section id="summary-section" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Card Total Previsto -->
-              _B_R_ <div class="bg-white p-5 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4">
-                    <div class="flex-shrink-0 bg-blue-100 p-3 rounded-full">
-                        <i data-lucide="wallet" class="h-7 w-7 text-blue-600"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-slate-500">Total Previsto (Mês)</h3>
-                        <p id="total-previsto" class="text-2xl lg:text-3xl font-semibold text-blue-600">R$ 0,00</p>
-                    </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500">Total Previsto (Mês)</h3>
+                    <p id="total-previsto" class="text-3xl font-semibold text-blue-600">R$ 0,00</p>
                 </div>
-                <!-- Card Total Pago -->
-                <div class="bg-white p-5 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4">
-                    <div class="flex-shrink-0 bg-green-100 p-3 rounded-full">
-                        <i data-lucide="check-circle" class="h-7 w-7 text-green-600"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-slate-500">Total Pago (Mês)</h3>
-                        <p id="total-pago" class="text-2xl lg:text-3xl font-semibold text-green-600">R$ 0,00</p>
-                    </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500">Total Pago (Mês)</h3>
+                    <p id="total-pago" class="text-3xl font-semibold text-green-600">R$ 0,00</p>
                 </div>
-                <!-- Card Restante a Pagar -->
-                <div class="bg-white p-5 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4">
-                    <div class="flex-shrink-0 bg-red-100 p-3 rounded-full">
-                        <i data-lucide="alert-circle" class="h-7 w-7 text-red-600"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-slate-500">Restante a Pagar</h3>
-                        <p id="total-restante" class="text-2xl lg:text-3xl font-semibold text-red-600">R$ 0,00</p>
-                    </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500">Restante a Pagar</h3>
+                    <p id="total-restante" class="text-3xl font-semibold text-red-600">R$ 0,00</p>
                 </div>
             </section>
 
             <!-- Seção do Dashboard (Gráfico) -->
-            <section id="dashboard-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-                <h2 class="text-2xl font-semibold mb-4 text-slate-700">Composição das Despesas</h2>
+            <section id="dashboard-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-semibold mb-4">Composição das Despesas</h2>
                 <div class="relative h-64 md:h-80">
                     <canvas id="expense-pie-chart"></canvas>
                 </div>
             </section>
 
             <!-- Seção para Adicionar Nova Conta Fixa -->
-            <section id="add-expense-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-                <h2 class="text-2xl font-semibold mb-4 text-slate-700">Adicionar Nova Conta Fixa</h2>
+            <section id="add-expense-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-semibold mb-4">Adicionar Nova Conta Fixa</h2>
                 <form id="add-expense-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div class="md:col-span-1">
-                        <label for="expense-name" class="block text-sm font-medium text-slate-700">Nome da Conta</label>
-                        <input type="text" id="expense-name" placeholder="Ex: Aluguel, Luz, Internet" class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
+                        <input type="text" id="expense-name" placeholder="Ex: Aluguel, Luz, Internet" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="md:col-span-1">
-                        <label for="expense-value" class="block text-sm font-medium text-slate-700">Valor Previsto (R$)</label>
-                        <input type="number" id="expense-value" step="0.01" placeholder="150.00" class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
+                        <input type="number" id="expense-value" step="0.01" placeholder="150.00" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <!-- Campo Dia do Vencimento -->
                     <div class="md:col-span-1">
-                        <label for="expense-due-date" class="block text-sm font-medium text-slate-700">Dia do Vencimento</label>
-                        <input type="number" id="expense-due-date" min="1" max="31" placeholder="Ex: 10" class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</label>
+                        <input type="number" id="expense-due-date" min="1" max="31" placeholder="Ex: 10" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="md:col-span-1">
-                        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 btn-click flex items-center justify-center">
+                        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center">
                             <i data-lucide="plus" class="mr-2 h-5 w-5"></i>
                             Adicionar Conta
                         </button>
@@ -194,21 +181,21 @@
             <section id="expense-list-section">
                 <!-- Navegação de Mês -->
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-semibold text-slate-700">Minhas Contas</h2>
+                    <h2 class="text-2xl font-semibold">Minhas Contas</h2>
                     <div class="flex items-center gap-2">
-                        <button id="prev-month-btn" class="p-2 rounded-md bg-slate-200 hover:bg-slate-300 btn-click">
+                        <button id="prev-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
                             <i data-lucide="chevron-left" class="h-5 w-5"></i>
                         </button>
-                        <span id="current-month" class="font-semibold text-lg text-slate-700 w-36 text-center"></span>
-                        <button id="next-month-btn" class="p-2 rounded-md bg-slate-200 hover:bg-slate-300 btn-click">
+                        <span id="current-month" class="font-semibold text-lg text-gray-700 w-36 text-center"></span>
+                        <button id="next-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
                             <i data-lucide="chevron-right" class="h-5 w-5"></i>
-                  t   </button>
+                        </button>
                     </div>
                 </div>
                 <div id="expense-list" class="space-y-4">
                     <!-- Contas serão injetadas aqui pelo JavaScript -->
-                    <p class="text-slate-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>
-section         </div>
+                    <p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>
+                </div>
             </section>
 
         </div>
@@ -223,10 +210,10 @@ section         </div>
                 </div>
                 <div class="flex-1">
                     <h4 class="text-lg font-semibold" id="alert-title">Sucesso!</h4>
-                    <p class="text-sm text-slate-600" id="alert-message">Operação realizada.</p>
+                    <p class="text-sm text-gray-600" id="alert-message">Operação realizada.</p>
                 </div>
             </div>
-            <button id="alert-close-btn" class="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 btn-click">
+            <button id="alert-close-btn" class="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
                 Fechar
             </button>
         </div>
@@ -240,23 +227,23 @@ section         </div>
                 <input type="hidden" id="edit-expense-id">
                 <div class="space-y-4">
                     <div>
-                        <label for="edit-expense-name" class="block text-sm font-medium text-slate-700">Nome da Conta</label>
-                        <input type="text" id="edit-expense-name" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="edit-expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
+                        <input type="text" id="edit-expense-name" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="edit-expense-value" class="block text-sm font-medium text-slate-700">Valor Previsto (R$)</label>
-                        <input type="number" id="edit-expense-value" step="0.01" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="edit-expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
+                        <input type="number" id="edit-expense-value" step="0.01" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="edit-expense-due-date" class="block text-sm font-medium text-slate-700">Dia do Vencimento</label>
-                        <input type="number" id="edit-expense-due-date" min="1" max="31" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <label for="edit-expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</dlabel>
+                        <input type="number" id="edit-expense-due-date" min="1" max="31" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
-              _B_R_ </div>
+                </div>
                 <div class="mt-6 flex gap-4">
-                    <button type="button" id="edit-cancel-btn" class="w-full px-4 py-3 bg-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-300 btn-click">
+                    <button type="button" id="edit-cancel-btn" class="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:outline-none">
                         Cancelar
                     </button>
-                    <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 btn-click">
+                    <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none">
                         Salvar Alterações
                     </button>
                 </div>
@@ -265,7 +252,7 @@ section         </div>
     </div>
 
 
-    <!-- Scripts do Firebase (MANTENDO SUA CONFIGURAÇÃO ORIGINAL) -->
+    <!-- Scripts do Firebase (MANDATÓRIO) -->
     <script type="module">
         // Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -278,7 +265,7 @@ section         </div>
             signInWithEmailAndPassword,
             signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Importações do Firestore
+        // Importações do Firestore (corrigido da v5)
         import { 
             getFirestore, 
             doc, 
@@ -287,7 +274,7 @@ section         </div>
             addDoc, 
             deleteDoc, 
             onSnapshot, 
-e         collection, 
+            collection, 
             query, 
             where, 
             Timestamp,
@@ -313,7 +300,7 @@ e         collection,
         let expensesListener = null;
         let paymentsListener = null;
 
-        // --- Configuração do Firebase (Mantendo suas chaves originais) ---
+        // --- Configuração do Firebase (Suas Chaves) ---
         const firebaseConfig = {
           apiKey: "AIzaSyCkhSVSUsdhWL1SJi6fs2jkZDvWiFZ5zkw",
           authDomain: "meu-controle-financeiro-86f94.firebaseapp.com",
@@ -342,7 +329,7 @@ e         collection,
         const addExpenseForm = document.getElementById('add-expense-form');
         const expenseNameInput = document.getElementById('expense-name');
         const expenseValueInput = document.getElementById('expense-value');
-section     const expenseDueDateInput = document.getElementById('expense-due-date');
+        const expenseDueDateInput = document.getElementById('expense-due-date');
         const expenseList = document.getElementById('expense-list');
         const totalPrevistoEl = document.getElementById('total-previsto');
         const totalPagoEl = document.getElementById('total-pago');
@@ -365,7 +352,7 @@ section     const expenseDueDateInput = document.getElementById('expense-due-d
         const editExpenseForm = document.getElementById('edit-expense-form');
         const editExpenseId = document.getElementById('edit-expense-id');
         const editExpenseName = document.getElementById('edit-expense-name');
-section     const editExpenseValue = document.getElementById('edit-expense-value');
+        const editExpenseValue = document.getElementById('edit-expense-value');
         const editExpenseDueDate = document.getElementById('edit-expense-due-date');
         const editCancelBtn = document.getElementById('edit-cancel-btn');
 
@@ -418,7 +405,7 @@ section     const editExpenseValue = document.getElementById('edit-expense-val
             alertModal.classList.remove('hidden');
             setTimeout(() => {
                 alertModalContent.classList.remove('scale-95', 'opacity-0');
-Note         }, 50);
+            }, 50);
         }
 
         // Mostra erros nos formulários de login/registro
@@ -478,7 +465,7 @@ Note         }, 50);
                 loadingSpinner.classList.add('hidden'); // Esconde o spinner principal
                 
                 if (user) {
-section           // Usuário está logado
+                    // Usuário está logado
                     userId = user.uid;
                     userEmailDisplay.textContent = user.email;
                     currentMonthEl.textContent = getMonthYearName(selectedDate);
@@ -490,10 +477,7 @@ section           // Usuário está logado
                     
                     // Renderiza ícones do app (com atraso para garantir)
                     setTimeout(() => {
-                        if (window.lucide) {
-                            console.log("Lucide: Ícones de App Renderizados");
-                            lucide.createIcons();
-                        }
+                        if (window.lucide) lucide.createIcons();
                     }, 50);
 
                 } else {
@@ -504,13 +488,10 @@ section           // Usuário está logado
                     
                     detachDataListeners(); // Para de ouvir dados antigos
                     clearLocalCache(); // Limpa dados da tela
-                Note 
+                    
                     // Renderiza ícones do auth (com atraso para garantir)
                     setTimeout(() => {
-                        if (window.lucide) {
-                            console.log("Lucide: Ícones de Auth Renderizados");
-                            lucide.createIcons();
-                        }
+                        if (window.lucide) lucide.createIcons();
                     }, 50);
                 }
             });
@@ -587,7 +568,7 @@ section           // Usuário está logado
                 expensesListener(); 
                 expensesListener = null;
                 console.log("Listener de Contas Fixas desligado.");
-Note       }
+            }
             if (paymentsListener) {
                 paymentsListener();
                 paymentsListener = null;
@@ -640,7 +621,7 @@ Note       }
             const paymentsPath = getCollectionPath('monthlyPayments');
             const currentMonth = getMonthYear(selectedDate);
             const qPayments = query(collection(db, paymentsPath), where("monthYear", "==", currentMonth));
-Note         paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
+            paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
                 console.log("Snapshot de Pagamentos recebido.");
                 monthlyPaymentsCache = {};
                 querySnapshot.forEach((doc) => {
@@ -739,7 +720,7 @@ Note         paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
                 await addDoc(collection(db, paymentsPath), {
                     expenseId: expenseId,
                     paidValue: paidValue,
-note               monthYear: getMonthYear(selectedDate), 
+                    monthYear: getMonthYear(selectedDate), 
                     status: 'paid',
                     paidAt: Timestamp.now()
                 });
@@ -765,7 +746,7 @@ note               monthYear: getMonthYear(selectedDate),
         }
         
         // Edita uma conta fixa
-note     editExpenseForm.addEventListener('submit', async (e) => {
+        editExpenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = editExpenseId.value;
             const name = editExpenseName.value.trim();
@@ -779,7 +760,7 @@ note     editExpenseForm.addEventListener('submit', async (e) => {
 
             try {
                 const docPath = doc(db, getCollectionPath('fixedExpenses'), id);
-e             await setDoc(docPath, {
+                await setDoc(docPath, {
                     name: name,
                     estimatedValue: estimatedValue,
                     dueDate: dueDate,
@@ -805,7 +786,7 @@ e             await setDoc(docPath, {
                 showAlert("Pagamento desfeito com sucesso.");
             } catch (error) {
                 console.error("Erro ao desfazer pagamento:", error);
-section           showAlert("Erro ao desfazer o pagamento.", true);
+                showAlert("Erro ao desfazer o pagamento.", true);
             }
         }
 
@@ -818,16 +799,15 @@ section           showAlert("Erro ao desfazer o pagamento.", true);
             updateSummary();
             renderDashboard(); 
             
-            // Chama o Lucide para renderizar TODOS os ícones (estáticos e dinâmicos)
-            // O setTimeout garante que o DOM foi atualizado pelo JS antes de rodar
+            // CORREÇÃO: Atraso para garantir que o DOM esteja pronto para os ícones
             setTimeout(() => {
                 if (window.lucide) {
                     lucide.createIcons();
-                    console.log("Lucide: Ícones da Aplicação Renderizados");
+                    console.log("Ícones Lucide renderizados.");
                 } else {
-                    console.error("Biblioteca Lucide não carregada (renderApp).");
+                    console.error("Biblioteca Lucide não carregada.");
                 }
-            }, 50);
+            }, 0); // 0ms é suficiente para mover para o próximo 'tick'
         }
 
         // Atualiza o card de resumo
@@ -838,7 +818,7 @@ section           showAlert("Erro ao desfazer o pagamento.", true);
             fixedExpensesCache.forEach(expense => {
                 totalPrevisto += expense.estimatedValue;
                 const payment = monthlyPaymentsCache[expense.id];
-Note           if (payment) {
+                if (payment) {
                     totalPago += payment.paidValue;
                 }
             });
@@ -860,7 +840,7 @@ Note           if (payment) {
             const chartData = fixedExpensesCache.filter(e => e.estimatedValue > 0);
             const labels = chartData.map(e => e.name);
             const data = chartData.map(e => e.estimatedValue);
-Note         
+            
             const backgroundColors = labels.map((_, i) => chartColors[i % chartColors.length]);
 
             if (expenseChart) {
@@ -868,20 +848,20 @@ Note        
             }
 
             expenseChart = new Chart(ctx, {
-Note           type: 'pie',
+                type: 'pie',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Valor Previsto',
-s                     data: data,
+                        data: data,
                         backgroundColor: backgroundColors,
                         borderWidth: 2,
-                        borderColor: '#f8fafc' // bg-slate-50
-A               }]
+                        borderColor: '#f9fafb' // bg-gray-50
+                    }]
                 },
                 options: {
                     responsive: true,
-Ah               maintainAspectRatio: false,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -894,16 +874,16 @@ Ah               maintainAspectRatio: false,
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-A                               let label = context.label || '';
+                                    let label = context.label || '';
                                     if (label) {
-m                                 label += ': ';
+                                        label += ': ';
                                     }
                                     if (context.parsed !== null) {
                                         label += formatCurrency(context.parsed);
-Note                             }
+                                    }
                                     return label;
                                 }
-                s         }
+                            }
                         }
                     }
                 }
@@ -911,11 +891,11 @@ Note                             }
         }
 
         // Renderiza a lista de contas
-content       function renderExpenseList() {
+        function renderExpenseList() {
             expenseList.innerHTML = ''; 
 
             if (fixedExpensesCache.length === 0) {
-                expenseList.innerHTML = `<p class="text-slate-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>`;
+                expenseList.innerHTML = `<p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>`;
                 return;
             }
 
@@ -934,18 +914,18 @@ content       function renderExpenseList() {
                 const isFutureMonth = selectedDateOnly > today;
                 
                 let status = 'Pendente';
-                let statusColor = 'bg-slate-500 text-slate-100'; // Pendente
+                let statusColor = 'bg-gray-500 text-gray-100'; // Pendente
                 
                 if (isPaid) {
                     status = 'Pago';
                     statusColor = 'bg-green-600 text-green-100'; // Pago
-e             } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
+                } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
                     status = 'Atrasado';
                     statusColor = 'bg-red-600 text-red-100'; // Atrasado
                 }
 
                 const card = document.createElement('div');
-                card.className = `bg-white p-4 rounded-lg shadow-md border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isPaid ? 'border-green-300 bg-green-50 opacity-90' : 'border-slate-200'}`;
+                card.className = `bg-white p-4 rounded-lg shadow-md border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isPaid ? 'border-green-300 bg-green-50 opacity-90' : 'border-gray-200'}`;
                 
                 let paymentHtml = '';
                 if (isPaid) {
@@ -960,51 +940,52 @@ e             } else if (isCurrentMonth && (expense.dueDate || 32) < curre
                     `;
                 } else {
                     if (isFutureMonth) {
-                         paymentHtml = `<p class="text-sm text-slate-500 text-right w-full md:w-auto">Disponível em ${getMonthYearName(selectedDate)}</p>`;
+                         paymentHtml = `<p class="text-sm text-gray-500 text-right w-full md:w-auto">Disponível em ${getMonthYearName(selectedDate)}</p>`;
                     } else {
                         paymentHtml = `
                             <div class="w-full md:w-auto">
-                                <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 btn-click flex items-center justify-center text-sm">
+                                <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
                                     <i data-lucide="check" class="mr-1 h-4 w-4"></i>
                                     Marcar como Pago
                                 </button>
-note                   </div>
+                            </div>
                         `;
                     }
                 }
 
-                // Layout do Card (baseado na v5.2, que estava boa)
+                // *** CORREÇÃO DE LAYOUT (v5.2) ***
+                // Movi os botões de ação para o cabeçalho do card
                 card.innerHTML = `
                     <div class="flex-1 w-full md:w-auto">
                         <div class="flex items-center justify-between gap-4">
-                            <h3 class="text-lg font-semibold text-slate-800">${expense.name}</h3>
-section                   
-                            <!-- Botões de Ação -->
+                            <h3 class="text-lg font-semibold text-gray-800">${expense.name}</h3>
+                            
+                            <!-- Botões movidos para cá -->
                             <div class="flex items-center gap-3 flex-shrink-0">
                                 <span class="text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}">${status}</span>
-                                <div class="flex gap-2 text-slate-400">
-                                    <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors btn-click">
+                                <div class="flex gap-2 text-gray-400">
+                                    <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors">
                                         <i data-lucide="pencil" class="h-5 w-5"></i>
                                     </button>
-                        V         <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors btn-click">
+                                    <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
                                         <i data-lucide="trash-2" class="h-5 w-5"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        <p class="text-sm text-slate-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
-section               <p class="text-sm text-slate-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
+                        <p class="text-sm text-gray-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
+                        <p class="text-sm text-gray-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
                     </div>
-                    <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-slate-200 md:pl-4">
+                    <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-200 md:pl-4">
                         ${paymentHtml}
-            s     </div>
-    s       `;
+                    </div>
+                `;
                 expenseList.appendChild(card);
             });
         }
         
         // --- Listeners de Eventos da UI ---
-A     
+        
         expenseList.addEventListener('click', (e) => {
             const target = e.target.closest('button, form');
             if (!target) return;
@@ -1019,13 +1000,13 @@ A    
                 const expenseId = target.dataset.expenseId;
                 const expenseName = target.dataset.expenseName;
                 handleDeleteExpense(expenseId, expenseName);
-Note       }
+            }
             if (target.tagName === 'BUTTON' && action === 'undo') {
                 const paymentId = target.dataset.paymentId;
                 handleUndoPayment(paymentId);
             }
             if (target.tagName === 'BUTTON' && action === 'edit') {
-Methods         const expenseId = target.dataset.expenseId;
+                const expenseId = target.dataset.expenseId;
                 const expense = fixedExpensesCache.find(e => e.id === expenseId);
                 if (expense) {
                     openEditModal(expense);
@@ -1052,4 +1033,3 @@ Methods         const expenseId = target.dataset.expenseId;
     </script>
 </body>
 </html>
-
