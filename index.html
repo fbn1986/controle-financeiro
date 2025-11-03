@@ -125,7 +125,7 @@
             <!-- Seção de Resumo (COM MELHORIAS VISUAIS) -->
             <section id="summary-section" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Card Total Previsto -->
-                <div class="bg-white p-5 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4">
+              _B_R_ <div class="bg-white p-5 rounded-xl shadow-lg border border-slate-200 flex items-center gap-4">
                     <div class="flex-shrink-0 bg-blue-100 p-3 rounded-full">
                         <i data-lucide="wallet" class="h-7 w-7 text-blue-600"></i>
                     </div>
@@ -202,13 +202,13 @@
                         <span id="current-month" class="font-semibold text-lg text-slate-700 w-36 text-center"></span>
                         <button id="next-month-btn" class="p-2 rounded-md bg-slate-200 hover:bg-slate-300 btn-click">
                             <i data-lucide="chevron-right" class="h-5 w-5"></i>
-                        </button>
+                  t   </button>
                     </div>
                 </div>
                 <div id="expense-list" class="space-y-4">
                     <!-- Contas serão injetadas aqui pelo JavaScript -->
                     <p class="text-slate-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>
-                </div>
+section         </div>
             </section>
 
         </div>
@@ -246,12 +246,12 @@
                     <div>
                         <label for="edit-expense-value" class="block text-sm font-medium text-slate-700">Valor Previsto (R$)</label>
                         <input type="number" id="edit-expense-value" step="0.01" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-f               </div>
+                    </div>
                     <div>
                         <label for="edit-expense-due-date" class="block text-sm font-medium text-slate-700">Dia do Vencimento</label>
                         <input type="number" id="edit-expense-due-date" min="1" max="31" required class="mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                </div>
+              _B_R_ </div>
                 <div class="mt-6 flex gap-4">
                     <button type="button" id="edit-cancel-btn" class="w-full px-4 py-3 bg-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-300 btn-click">
                         Cancelar
@@ -287,7 +287,7 @@ f               </div>
             addDoc, 
             deleteDoc, 
             onSnapshot, 
-            collection, 
+e         collection, 
             query, 
             where, 
             Timestamp,
@@ -342,7 +342,7 @@ f               </div>
         const addExpenseForm = document.getElementById('add-expense-form');
         const expenseNameInput = document.getElementById('expense-name');
         const expenseValueInput = document.getElementById('expense-value');
-        const expenseDueDateInput = document.getElementById('expense-due-date');
+section     const expenseDueDateInput = document.getElementById('expense-due-date');
         const expenseList = document.getElementById('expense-list');
         const totalPrevistoEl = document.getElementById('total-previsto');
         const totalPagoEl = document.getElementById('total-pago');
@@ -365,7 +365,7 @@ f               </div>
         const editExpenseForm = document.getElementById('edit-expense-form');
         const editExpenseId = document.getElementById('edit-expense-id');
         const editExpenseName = document.getElementById('edit-expense-name');
-        const editExpenseValue = document.getElementById('edit-expense-value');
+section     const editExpenseValue = document.getElementById('edit-expense-value');
         const editExpenseDueDate = document.getElementById('edit-expense-due-date');
         const editCancelBtn = document.getElementById('edit-cancel-btn');
 
@@ -418,7 +418,7 @@ f               </div>
             alertModal.classList.remove('hidden');
             setTimeout(() => {
                 alertModalContent.classList.remove('scale-95', 'opacity-0');
-            }, 50);
+Note         }, 50);
         }
 
         // Mostra erros nos formulários de login/registro
@@ -455,7 +455,7 @@ f               </div>
                 return null;
             }
             return `users/${userId}/${collectionName}`;
-T     }
+        }
 
         // --- Inicialização do Firebase ---
         async function initializeFirebase() {
@@ -478,7 +478,7 @@ T     }
                 loadingSpinner.classList.add('hidden'); // Esconde o spinner principal
                 
                 if (user) {
-                    // Usuário está logado
+section           // Usuário está logado
                     userId = user.uid;
                     userEmailDisplay.textContent = user.email;
                     currentMonthEl.textContent = getMonthYearName(selectedDate);
@@ -491,7 +491,7 @@ T     }
                     // Renderiza ícones do app (com atraso para garantir)
                     setTimeout(() => {
                         if (window.lucide) {
-                            console.log("Lucide
+                            console.log("Lucide: Ícones de App Renderizados");
                             lucide.createIcons();
                         }
                     }, 50);
@@ -504,7 +504,7 @@ T     }
                     
                     detachDataListeners(); // Para de ouvir dados antigos
                     clearLocalCache(); // Limpa dados da tela
-                    
+                Note 
                     // Renderiza ícones do auth (com atraso para garantir)
                     setTimeout(() => {
                         if (window.lucide) {
@@ -587,11 +587,11 @@ T     }
                 expensesListener(); 
                 expensesListener = null;
                 console.log("Listener de Contas Fixas desligado.");
-            }
+Note       }
             if (paymentsListener) {
                 paymentsListener();
                 paymentsListener = null;
-Note             console.log("Listener de Pagamentos desligado.");
+                console.log("Listener de Pagamentos desligado.");
             }
         }
         
@@ -640,7 +640,7 @@ Note             console.log("Listener de Pagamentos desligado.");
             const paymentsPath = getCollectionPath('monthlyPayments');
             const currentMonth = getMonthYear(selectedDate);
             const qPayments = query(collection(db, paymentsPath), where("monthYear", "==", currentMonth));
-            paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
+Note         paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
                 console.log("Snapshot de Pagamentos recebido.");
                 monthlyPaymentsCache = {};
                 querySnapshot.forEach((doc) => {
@@ -707,14 +707,14 @@ Note             console.log("Listener de Pagamentos desligado.");
             predefined.forEach(expense => {
                 const docRef = doc(collection(db, expensesPath)); 
                 batch.set(docRef, { ...expense, createdAt: Timestamp.now() });
-m         });
+            });
 
             try {
                 await batch.commit();
                 console.log("Contas predefinidas adicionadas!");
             } catch (error) {
                 console.error("Erro ao adicionar contas predefinidas: ", error);
-e       }
+            }
         }
 
         // Marcar como Pago
@@ -731,7 +731,7 @@ e       }
                 return;
             }
             if (monthlyPaymentsCache[expenseId]) {
-s             showAlert("Esta conta já foi paga este mês.", true);
+                showAlert("Esta conta já foi paga este mês.", true);
                 return;
             }
             try {
@@ -739,7 +739,7 @@ s             showAlert("Esta conta já foi paga este mês.", true);
                 await addDoc(collection(db, paymentsPath), {
                     expenseId: expenseId,
                     paidValue: paidValue,
-                    monthYear: getMonthYear(selectedDate), 
+note               monthYear: getMonthYear(selectedDate), 
                     status: 'paid',
                     paidAt: Timestamp.now()
                 });
@@ -754,7 +754,7 @@ s             showAlert("Esta conta já foi paga este mês.", true);
         async function handleDeleteExpense(expenseId, expenseName) {
             // Adicionar confirmação seria ideal, mas alert() é proibido.
             // Por enquanto, exclui direto.
-m         try {
+            try {
                 const docPath = doc(db, getCollectionPath('fixedExpenses'), expenseId);
                 await deleteDoc(docPath);
                 showAlert(`Conta "${expenseName}" excluída com sucesso.`);
@@ -765,12 +765,12 @@ m         try {
         }
         
         // Edita uma conta fixa
-        editExpenseForm.addEventListener('submit', async (e) => {
+note     editExpenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = editExpenseId.value;
             const name = editExpenseName.value.trim();
             const estimatedValue = parseFloat(editExpenseValue.value);
-A         const dueDate = parseInt(editExpenseDueDate.value);
+            const dueDate = parseInt(editExpenseDueDate.value);
 
             if (!id || !name || isNaN(estimatedValue) || estimatedValue <= 0 || isNaN(dueDate) || dueDate < 1 || dueDate > 31) {
                 showAlert("Por favor, preencha todos os campos corretamente.", true);
@@ -779,7 +779,7 @@ A         const dueDate = parseInt(editExpenseDueDate.value);
 
             try {
                 const docPath = doc(db, getCollectionPath('fixedExpenses'), id);
-                await setDoc(docPath, {
+e             await setDoc(docPath, {
                     name: name,
                     estimatedValue: estimatedValue,
                     dueDate: dueDate,
@@ -789,7 +789,7 @@ A         const dueDate = parseInt(editExpenseDueDate.value);
                 closeEditModal();
             } catch (error) {
                 console.error("Erro ao editar conta:", error);
-e             showAlert("Erro ao salvar as alterações.", true);
+                showAlert("Erro ao salvar as alterações.", true);
             }
         });
 
@@ -797,7 +797,7 @@ e             showAlert("Erro ao salvar as alterações.", true);
         async function handleUndoPayment(paymentId) {
              if (!paymentId) {
                 showAlert("ID do pagamento não encontrado.", true);
-Note             return;
+                return;
             }
             try {
                 const docPath = doc(db, getCollectionPath('monthlyPayments'), paymentId);
@@ -805,14 +805,14 @@ Note             return;
                 showAlert("Pagamento desfeito com sucesso.");
             } catch (error) {
                 console.error("Erro ao desfazer pagamento:", error);
-                showAlert("Erro ao desfazer o pagamento.", true);
+section           showAlert("Erro ao desfazer o pagamento.", true);
             }
         }
 
         // --- Renderização da UI ---
 
         function renderApp() {
-          T if (appContainer.classList.contains('hidden')) return; 
+            if (appContainer.classList.contains('hidden')) return; 
 
             renderExpenseList();
             updateSummary();
@@ -824,7 +824,7 @@ Note             return;
                 if (window.lucide) {
                     lucide.createIcons();
                     console.log("Lucide: Ícones da Aplicação Renderizados");
-img             } else {
+                } else {
                     console.error("Biblioteca Lucide não carregada (renderApp).");
                 }
             }, 50);
@@ -833,14 +833,14 @@ img             } else {
         // Atualiza o card de resumo
         function updateSummary() {
             let totalPrevisto = 0;
-A         let totalPago = 0;
+            let totalPago = 0;
 
             fixedExpensesCache.forEach(expense => {
                 totalPrevisto += expense.estimatedValue;
                 const payment = monthlyPaymentsCache[expense.id];
-                if (payment) {
+Note           if (payment) {
                     totalPago += payment.paidValue;
-A             }
+                }
             });
 
             const totalRestante = totalPrevisto - totalPago;
@@ -860,7 +860,7 @@ A             }
             const chartData = fixedExpensesCache.filter(e => e.estimatedValue > 0);
             const labels = chartData.map(e => e.name);
             const data = chartData.map(e => e.estimatedValue);
-            
+Note         
             const backgroundColors = labels.map((_, i) => chartColors[i % chartColors.length]);
 
             if (expenseChart) {
@@ -868,50 +868,50 @@ A             }
             }
 
             expenseChart = new Chart(ctx, {
-                type: 'pie',
+Note           type: 'pie',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Valor Previsto',
-                        data: data,
+s                     data: data,
                         backgroundColor: backgroundColors,
-Color                 borderWidth: 2,
+                        borderWidth: 2,
                         borderColor: '#f8fafc' // bg-slate-50
-                    }]
+A               }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-Color                 plugins: {
+Ah               maintainAspectRatio: false,
+                    plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
-                    D         font: {
+                                font: {
                                     family: "'Inter', sans-serif"
                                 }
                             }
-a                     },
+                        },
                         tooltip: {
                             callbacks: {
-Color                               label: function(context) {
-                                    let label = context.label || '';
+                                label: function(context) {
+A                               let label = context.label || '';
                                     if (label) {
-Note                                   label += ': ';
+m                                 label += ': ';
                                     }
                                     if (context.parsed !== null) {
-A                                     label += formatCurrency(context.parsed);
-                                    }
-                    M           return label;
+                                        label += formatCurrency(context.parsed);
+Note                             }
+                                    return label;
                                 }
-                            }
-Note                     }
+                s         }
+                        }
                     }
                 }
             });
         }
 
         // Renderiza a lista de contas
-        function renderExpenseList() {
+content       function renderExpenseList() {
             expenseList.innerHTML = ''; 
 
             if (fixedExpensesCache.length === 0) {
@@ -920,13 +920,13 @@ Note                     }
             }
 
             fixedExpensesCache.forEach(expense => {
-Note           const payment = monthlyPaymentsCache[expense.id];
+                const payment = monthlyPaymentsCache[expense.id];
                 const isPaid = !!payment;
 
                 // Lógica de Status
                 const today = new Date();
                 today.setHours(0,0,0,0); // Zera a hora para comparações
-Color               const selectedDateOnly = new Date(selectedDate);
+                const selectedDateOnly = new Date(selectedDate);
                 selectedDateOnly.setHours(0,0,0,0);
                 
                 const currentDay = new Date().getDate();
@@ -934,14 +934,14 @@ Color               const selectedDateOnly = new Date(selectedDate);
                 const isFutureMonth = selectedDateOnly > today;
                 
                 let status = 'Pendente';
-A             let statusColor = 'bg-slate-500 text-slate-100'; // Pendente
+                let statusColor = 'bg-slate-500 text-slate-100'; // Pendente
                 
                 if (isPaid) {
-Color                 status = 'Pago';
+                    status = 'Pago';
                     statusColor = 'bg-green-600 text-green-100'; // Pago
-                } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
+e             } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
                     status = 'Atrasado';
-  A               statusColor = 'bg-red-600 text-red-100'; // Atrasado
+                    statusColor = 'bg-red-600 text-red-100'; // Atrasado
                 }
 
                 const card = document.createElement('div');
@@ -953,7 +953,7 @@ Color                 status = 'Pago';
                         <div class="flex-shrink-0 text-right w-full md:w-auto space-y-2">
                             <div class="flex items-center justify-end text-green-700">
                                 <i data-lucide="check-circle" class="mr-2 h-5 w-5"></i>
-Note                           <span class="font-semibold">Pago: ${formatCurrency(payment.paidValue)}</span>
+                                <span class="font-semibold">Pago: ${formatCurrency(payment.paidValue)}</span>
                             </div>
                              <button data-action="undo" data-payment-id="${payment.id}" class="w-full text-xs text-blue-600 hover:underline">Marcar como Pendente</button>
                         </div>
@@ -966,9 +966,9 @@ Note                           <span class="font-semibold">Pago: ${
                             <div class="w-full md:w-auto">
                                 <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 btn-click flex items-center justify-center text-sm">
                                     <i data-lucide="check" class="mr-1 h-4 w-4"></i>
-Color                                 Marcar como Pago
+                                    Marcar como Pago
                                 </button>
-                            </div>
+note                   </div>
                         `;
                     }
                 }
@@ -978,54 +978,54 @@ Color                                 Marcar como Pago
                     <div class="flex-1 w-full md:w-auto">
                         <div class="flex items-center justify-between gap-4">
                             <h3 class="text-lg font-semibold text-slate-800">${expense.name}</h3>
-                            
+section                   
                             <!-- Botões de Ação -->
                             <div class="flex items-center gap-3 flex-shrink-0">
                                 <span class="text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}">${status}</span>
                                 <div class="flex gap-2 text-slate-400">
                                     <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors btn-click">
-A                                   <i data-lucide="pencil" class="h-5 w-5"></i>
+                                        <i data-lucide="pencil" class="h-5 w-5"></i>
                                     </button>
-                                    <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors btn-click">
+                        V         <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors btn-click">
                                         <i data-lucide="trash-2" class="h-5 w-5"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <p class="text-sm text-slate-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
-                        <p class="text-sm text-slate-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
-Note               </div>
+section               <p class="text-sm text-slate-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
+                    </div>
                     <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-slate-200 md:pl-4">
                         ${paymentHtml}
-                    </div>
-                `;
+            s     </div>
+    s       `;
                 expenseList.appendChild(card);
             });
         }
         
         // --- Listeners de Eventos da UI ---
-        
+A     
         expenseList.addEventListener('click', (e) => {
             const target = e.target.closest('button, form');
             if (!target) return;
             const action = target.dataset.action;
 
             if (target.tagName === 'BUTTON' && action === 'pay') {
-a             e.preventDefault();
+                e.preventDefault();
                 const expenseId = target.dataset.expenseId;
                 handlePayExpense(expenseId); 
             }
             if (target.tagName === 'BUTTON' && action === 'delete') {
-Note             const expenseId = target.dataset.expenseId;
+                const expenseId = target.dataset.expenseId;
                 const expenseName = target.dataset.expenseName;
                 handleDeleteExpense(expenseId, expenseName);
-            }
+Note       }
             if (target.tagName === 'BUTTON' && action === 'undo') {
                 const paymentId = target.dataset.paymentId;
                 handleUndoPayment(paymentId);
             }
             if (target.tagName === 'BUTTON' && action === 'edit') {
-                const expenseId = target.dataset.expenseId;
+Methods         const expenseId = target.dataset.expenseId;
                 const expense = fixedExpensesCache.find(e => e.id === expenseId);
                 if (expense) {
                     openEditModal(expense);
@@ -1037,7 +1037,7 @@ Note             const expenseId = target.dataset.expenseId;
         prevMonthBtn.addEventListener('click', () => {
             selectedDate.setMonth(selectedDate.getMonth() - 1);
             currentMonthEl.textContent = getMonthYearName(selectedDate);
-section       loadData(); // Recarrega os dados para o novo mês
+            loadData(); // Recarrega os dados para o novo mês
         });
 
         nextMonthBtn.addEventListener('click', () => {
