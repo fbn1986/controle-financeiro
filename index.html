@@ -6,9 +6,9 @@
     <title>Controle Financeiro Pessoal</title>
     <!-- Carrega o Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carrega os ícones do Lucide (CORRIGIDO - removi o script quebrado do lucide-react) -->
+    <!-- Carrega os ícones do Lucide -->
     <script src="https://unpkg.com/lucide-icons@latest/dist/lucide.min.js"></script>
-    <!-- Carrega o Chart.js (NOVO) -->
+    <!-- Carrega o Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Estilo da fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,7 +135,7 @@
                 </div>
             </section>
 
-            <!-- NOVO: Seção do Dashboard (Gráfico) -->
+            <!-- Seção do Dashboard (Gráfico) -->
             <section id="dashboard-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                 <h2 class="text-2xl font-semibold mb-4">Composição das Despesas</h2>
                 <div class="relative h-64 md:h-80">
@@ -155,7 +155,7 @@
                         <label for="expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
                         <input type="number" id="expense-value" step="0.01" placeholder="150.00" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
-                    <!-- NOVO: Campo Dia do Vencimento -->
+                    <!-- Campo Dia do Vencimento -->
                     <div class="md:col-span-1">
                         <label for="expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</label>
                         <input type="number" id="expense-due-date" min="1" max="31" placeholder="Ex: 10" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -171,7 +171,7 @@
 
             <!-- Seção da Lista de Contas -->
             <section id="expense-list-section">
-                <!-- NOVO: Navegação de Mês -->
+                <!-- Navegação de Mês -->
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-semibold">Minhas Contas</h2>
                     <div class="flex items-center gap-2">
@@ -211,7 +211,7 @@
         </div>
     </div>
 
-    <!-- NOVO: Modal de Edição -->
+    <!-- Modal de Edição -->
     <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white max-w-md w-full p-6 rounded-xl shadow-2xl transform transition-all scale-95 opacity-0" id="edit-modal-content">
             <h3 class="text-2xl font-semibold mb-6">Editar Conta Fixa</h3>
@@ -257,8 +257,7 @@
             signInWithEmailAndPassword,
             signOut
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // *** CORREÇÃO CRÍTICA ABAIXO ***
-        // O caminho estava errado, impedindo o app de carregar
+        // Importações do Firestore (corrigido da v5)
         import { 
             getFirestore, 
             doc, 
@@ -271,7 +270,7 @@
             query, 
             where, 
             Timestamp,
-            writeBatch, // NOVO: Para dados iniciais
+            writeBatch,
             setLogLevel
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -280,7 +279,7 @@
         let fixedExpensesCache = []; // Cache local das contas fixas
         let monthlyPaymentsCache = {}; // Cache local dos pagamentos (mapeado por expenseId)
         
-        // NOVO: Variáveis de estado do App
+        // --- Variáveis de estado do App ---
         let selectedDate = new Date(); // Controla o mês/ano selecionado
         let expenseChart = null; // Instância do Chart.js
         let isFirstLoad = true; // Para carregar dados iniciais
@@ -322,14 +321,14 @@
         const addExpenseForm = document.getElementById('add-expense-form');
         const expenseNameInput = document.getElementById('expense-name');
         const expenseValueInput = document.getElementById('expense-value');
-        const expenseDueDateInput = document.getElementById('expense-due-date'); // NOVO
+        const expenseDueDateInput = document.getElementById('expense-due-date');
         const expenseList = document.getElementById('expense-list');
         const totalPrevistoEl = document.getElementById('total-previsto');
         const totalPagoEl = document.getElementById('total-pago');
         const totalRestanteEl = document.getElementById('total-restante');
         const currentMonthEl = document.getElementById('current-month');
-        const prevMonthBtn = document.getElementById('prev-month-btn'); // NOVO
-        const nextMonthBtn = document.getElementById('next-month-btn'); // NOVO
+        const prevMonthBtn = document.getElementById('prev-month-btn');
+        const nextMonthBtn = document.getElementById('next-month-btn');
         
         // Modal de Alerta
         const alertModal = document.getElementById('alert-modal');
@@ -339,7 +338,7 @@
         const alertIconContainer = document.getElementById('alert-icon-container');
         const alertCloseBtn = document.getElementById('alert-close-btn');
 
-        // NOVO: Elementos do Modal de Edição
+        // Elementos do Modal de Edição
         const editModal = document.getElementById('edit-modal');
         const editModalContent = document.getElementById('edit-modal-content');
         const editExpenseForm = document.getElementById('edit-expense-form');
@@ -354,7 +353,7 @@
             setTimeout(() => alertModal.classList.add('hidden'), 150);
         });
 
-        // NOVO: Funções do Modal de Edição
+        // Funções do Modal de Edição
         function openEditModal(expense) {
             editExpenseId.value = expense.id;
             editExpenseName.value = expense.name;
@@ -391,7 +390,10 @@
                 alertCloseBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
                 alertCloseBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
             }
-            lucide.createIcons();
+            // Importante: Renderiza o ícone do modal
+            if (window.lucide) {
+                lucide.createIcons();
+            }
             alertModal.classList.remove('hidden');
             setTimeout(() => {
                 alertModalContent.classList.remove('scale-95', 'opacity-0');
@@ -412,13 +414,11 @@
         }
 
         // --- Funções Auxiliares ---
-        // MODIFICADO: Retorna o MM-YYYY da data selecionada
         function getMonthYear(date) {
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const year = date.getFullYear();
             return `${month}-${year}`;
         }
-        // MODIFICADO: Retorna o nome do mês da data selecionada
         function getMonthYearName(date) {
             return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
         }
@@ -460,14 +460,18 @@
                     // Usuário está logado
                     userId = user.uid;
                     userEmailDisplay.textContent = user.email;
-                    // MODIFICADO: Atualiza o display do mês
                     currentMonthEl.textContent = getMonthYearName(selectedDate);
                     
                     authContainer.classList.add('hidden');
                     appContainer.classList.remove('hidden');
                     
                     loadData(); // Carrega os dados do usuário
-                    lucide.createIcons(); // Renderiza ícones do app
+                    
+                    // Renderiza ícones do app (com atraso para garantir)
+                    setTimeout(() => {
+                        if (window.lucide) lucide.createIcons();
+                    }, 50);
+
                 } else {
                     // Usuário está deslogado
                     userId = null;
@@ -476,7 +480,11 @@
                     
                     detachDataListeners(); // Para de ouvir dados antigos
                     clearLocalCache(); // Limpa dados da tela
-                    lucide.createIcons(); // Renderiza ícones do auth
+                    
+                    // Renderiza ícones do auth (com atraso para garantir)
+                    setTimeout(() => {
+                        if (window.lucide) lucide.createIcons();
+                    }, 50);
                 }
             });
         }
@@ -490,7 +498,6 @@
             
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged vai cuidar de mostrar o app
             } catch (error) {
                 console.error("Erro de login:", error.code);
                 showAuthError('login', 'Email ou senha inválidos.');
@@ -512,9 +519,7 @@
             
             try {
                 await createUserWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged vai cuidar de mostrar o app
-            } catch (error)
- {
+            } catch (error) {
                 console.error("Erro de registro:", error.code);
                 if (error.code === 'auth/email-already-in-use') {
                     showAuthError('register', 'Este email já está em uso.');
@@ -530,7 +535,6 @@
         logoutButton.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                // onAuthStateChanged vai cuidar de mostrar a tela de login
             } catch (error) {
                 console.error("Erro ao sair:", error);
                 showAlert("Erro ao tentar sair.", true);
@@ -551,34 +555,34 @@
         
         // --- Gerenciamento de Dados (Firestore) ---
         
-        // Para de ouvir os snapshots
         function detachDataListeners() {
             if (expensesListener) {
-                expensesListener(); // Chama a função 'unsubscribe'
+                expensesListener(); 
                 expensesListener = null;
                 console.log("Listener de Contas Fixas desligado.");
             }
             if (paymentsListener) {
-                paymentsListener(); // Chama a função 'unsubscribe'
+                paymentsListener();
                 paymentsListener = null;
                 console.log("Listener de Pagamentos desligado.");
             }
         }
         
-        // Limpa os dados locais (chamado no logout)
         function clearLocalCache() {
             fixedExpensesCache = [];
             monthlyPaymentsCache = {};
-            selectedDate = new Date(); // Reseta a data
-            isFirstLoad = true; // Permite carregar dados iniciais para o próximo login
-            renderApp(); // Renderiza o app (que agora estará vazio)
+            selectedDate = new Date(); 
+            isFirstLoad = true; 
+            if (expenseChart) {
+                expenseChart.destroy();
+                expenseChart = null;
+            }
+            renderApp(); 
         }
 
-        // Carrega dados (contas fixas e pagamentos do mês)
         async function loadData() {
             if (!db || !userId) return;
             
-            // Garante que listeners antigos sejam desligados antes de ligar novos
             detachDataListeners();
             
             const expensesPath = getCollectionPath('fixedExpenses');
@@ -593,11 +597,10 @@
                     fixedExpensesCache.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // NOVO: Adiciona contas predefinidas se for o primeiro acesso e não houver contas
                 if (querySnapshot.empty && isFirstLoad) {
                     addPredefinedExpenses();
                 }
-                isFirstLoad = false; // Garante que só rode uma vez
+                isFirstLoad = false; 
 
                 fixedExpensesCache.sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
                 renderApp();
@@ -606,9 +609,8 @@
                 showAlert("Erro ao carregar contas fixas.", true);
             });
 
-            // 2. Listener para Pagamentos do Mês Atual
+            // 2. Listener para Pagamentos do Mês
             const paymentsPath = getCollectionPath('monthlyPayments');
-            // MODIFICADO: Usa a data selecionada (selectedDate)
             const currentMonth = getMonthYear(selectedDate);
             const qPayments = query(collection(db, paymentsPath), where("monthYear", "==", currentMonth));
             paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
@@ -632,7 +634,7 @@
             e.preventDefault();
             const name = expenseNameInput.value.trim();
             const estimatedValue = parseFloat(expenseValueInput.value);
-            const dueDate = parseInt(expenseDueDateInput.value); // NOVO
+            const dueDate = parseInt(expenseDueDateInput.value); 
 
             if (!name || isNaN(estimatedValue) || estimatedValue <= 0) {
                 showAlert("Por favor, preencha o nome e um valor válido.", true);
@@ -649,7 +651,7 @@
                 await addDoc(collection(db, expensesPath), {
                     name: name,
                     estimatedValue: estimatedValue,
-                    dueDate: dueDate, // NOVO
+                    dueDate: dueDate, 
                     createdAt: Timestamp.now()
                 });
                 
@@ -661,7 +663,7 @@
             }
         });
 
-        // NOVO: Adiciona contas predefinidas (chamado uma vez)
+        // Adiciona contas predefinidas (chamado uma vez)
         async function addPredefinedExpenses() {
             const expensesPath = getCollectionPath('fixedExpenses');
             const batch = writeBatch(db);
@@ -676,7 +678,7 @@
             ];
 
             predefined.forEach(expense => {
-                const docRef = doc(collection(db, expensesPath)); // Cria uma nova ref
+                const docRef = doc(collection(db, expensesPath)); 
                 batch.set(docRef, { ...expense, createdAt: Timestamp.now() });
             });
 
@@ -688,16 +690,14 @@
             }
         }
 
-        // Lança um pagamento para o mês atual
-        // MODIFICADO: Alterado para "Marcar como Pago"
+        // Marcar como Pago
         async function handlePayExpense(expenseId) {
-            // Pega o valor previsto do cache
             const expense = fixedExpensesCache.find(e => e.id === expenseId);
             if (!expense) {
                 showAlert("Conta não encontrada.", true);
                 return;
             }
-            const paidValue = expense.estimatedValue; // Usa o valor previsto
+            const paidValue = expense.estimatedValue; 
 
             if (isNaN(paidValue) || paidValue <= 0) {
                 showAlert("O valor previsto da conta é inválido.", true);
@@ -712,7 +712,7 @@
                 await addDoc(collection(db, paymentsPath), {
                     expenseId: expenseId,
                     paidValue: paidValue,
-                    monthYear: getMonthYear(selectedDate), // MODIFICADO: Usa o mês selecionado
+                    monthYear: getMonthYear(selectedDate), 
                     status: 'paid',
                     paidAt: Timestamp.now()
                 });
@@ -725,6 +725,8 @@
 
         // Exclui uma conta fixa
         async function handleDeleteExpense(expenseId, expenseName) {
+            // Adicionar confirmação seria ideal, mas alert() é proibido.
+            // Por enquanto, exclui direto.
             try {
                 const docPath = doc(db, getCollectionPath('fixedExpenses'), expenseId);
                 await deleteDoc(docPath);
@@ -735,7 +737,7 @@
             }
         }
         
-        // NOVO: Edita uma conta fixa
+        // Edita uma conta fixa
         editExpenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = editExpenseId.value;
@@ -764,7 +766,7 @@
             }
         });
 
-        // Desfaz um pagamento (exclui o registro de pagamento)
+        // Desfaz um pagamento
         async function handleUndoPayment(paymentId) {
              if (!paymentId) {
                 showAlert("ID do pagamento não encontrado.", true);
@@ -782,15 +784,22 @@
 
         // --- Renderização da UI ---
 
-        // Renderiza o app (lista e resumo) com base nos caches
         function renderApp() {
-            // Só renderiza se o app estiver visível
-            if (!appContainer.classList.contains('hidden')) {
-                renderExpenseList();
-                updateSummary();
-                renderDashboard(); // NOVO: Chama o render do gráfico
-                lucide.createIcons();
-            }
+            if (appContainer.classList.contains('hidden')) return; 
+
+            renderExpenseList();
+            updateSummary();
+            renderDashboard(); 
+            
+            // CORREÇÃO: Atraso para garantir que o DOM esteja pronto para os ícones
+            setTimeout(() => {
+                if (window.lucide) {
+                    lucide.createIcons();
+                    console.log("Ícones Lucide renderizados.");
+                } else {
+                    console.error("Biblioteca Lucide não carregada.");
+                }
+            }, 0); // 0ms é suficiente para mover para o próximo 'tick'
         }
 
         // Atualiza o card de resumo
@@ -814,22 +823,22 @@
             totalRestanteEl.classList.toggle('text-green-600', totalRestante <= 0);
         }
 
-        // NOVO: Renderiza o Gráfico de Pizza
+        // Renderiza o Gráfico de Pizza
         function renderDashboard() {
             const ctx = document.getElementById('expense-pie-chart');
             if (!ctx) return; 
 
-            const labels = fixedExpensesCache.map(e => e.name);
-            const data = fixedExpensesCache.map(e => e.estimatedValue);
+            // Filtra contas com valor 0 para não poluir o gráfico
+            const chartData = fixedExpensesCache.filter(e => e.estimatedValue > 0);
+            const labels = chartData.map(e => e.name);
+            const data = chartData.map(e => e.estimatedValue);
             
             const backgroundColors = labels.map((_, i) => chartColors[i % chartColors.length]);
 
-            // Destrói o gráfico antigo, se existir
             if (expenseChart) {
                 expenseChart.destroy();
             }
 
-            // Cria o novo gráfico
             expenseChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
@@ -875,7 +884,7 @@
 
         // Renderiza a lista de contas
         function renderExpenseList() {
-            expenseList.innerHTML = ''; // Limpa a lista
+            expenseList.innerHTML = ''; 
 
             if (fixedExpensesCache.length === 0) {
                 expenseList.innerHTML = `<p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>`;
@@ -886,11 +895,15 @@
                 const payment = monthlyPaymentsCache[expense.id];
                 const isPaid = !!payment;
 
-                // NOVO: Lógica de Status
+                // Lógica de Status
                 const today = new Date();
-                const currentDay = today.getDate();
-                const isCurrentMonth = selectedDate.getMonth() === today.getMonth() && selectedDate.getFullYear() === today.getFullYear();
-                const isFutureMonth = selectedDate > today;
+                today.setHours(0,0,0,0); // Zera a hora para comparações
+                const selectedDateOnly = new Date(selectedDate);
+                selectedDateOnly.setHours(0,0,0,0);
+                
+                const currentDay = new Date().getDate();
+                const isCurrentMonth = selectedDate.getMonth() === new Date().getMonth() && selectedDate.getFullYear() === new Date().getFullYear();
+                const isFutureMonth = selectedDateOnly > today;
                 
                 let status = 'Pendente';
                 let statusColor = 'bg-gray-500 text-gray-100'; // Pendente
@@ -898,7 +911,7 @@
                 if (isPaid) {
                     status = 'Pago';
                     statusColor = 'bg-green-600 text-green-100'; // Pago
-                } else if (isCurrentMonth && expense.dueDate < currentDay) {
+                } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
                     status = 'Atrasado';
                     statusColor = 'bg-red-600 text-red-100'; // Atrasado
                 }
@@ -918,11 +931,9 @@
                         </div>
                     `;
                 } else {
-                    // NOVO: Esconde o botão de pagar em meses futuros
                     if (isFutureMonth) {
-                         paymentHtml = `<p class="text-sm text-gray-500 text-right w-full md:w-auto">Pagamento disponível em ${getMonthYearName(selectedDate)}.</p>`;
+                         paymentHtml = `<p class="text-sm text-gray-500 text-right w-full md:w-auto">Disponível em ${getMonthYearName(selectedDate)}</p>`;
                     } else {
-                        // NOVO: Botão simples para marcar como pago
                         paymentHtml = `
                             <div class="w-full md:w-auto">
                                 <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
@@ -934,27 +945,31 @@
                     }
                 }
 
+                // *** CORREÇÃO DE LAYOUT (v5.2) ***
+                // Movi os botões de ação para o cabeçalho do card
                 card.innerHTML = `
                     <div class="flex-1 w-full md:w-auto">
                         <div class="flex items-center justify-between gap-4">
                             <h3 class="text-lg font-semibold text-gray-800">${expense.name}</h3>
-                            <!-- NOVO: Status Badge -->
-                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}">${status}</span>
+                            
+                            <!-- Botões movidos para cá -->
+                            <div class="flex items-center gap-3 flex-shrink-0">
+                                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}">${status}</span>
+                                <div class="flex gap-2 text-gray-400">
+                                    <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors">
+                                        <i data-lucide="pencil" class="h-5 w-5"></i>
+                                    </button>
+                                    <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
+                                        <i data-lucide="trash-2" class="h-5 w-5"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <p class="text-sm text-gray-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
                         <p class="text-sm text-gray-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
                     </div>
-                    <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-200">
+                    <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-200 md:pl-4">
                         ${paymentHtml}
-                    </div>
-                    <!-- NOVO: Botões de Ação (Editar e Excluir) -->
-                    <div class="flex gap-2 text-gray-400">
-                        <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors">
-                            <i data-lucide="pencil" class="h-5 w-5"></i>
-                        </button>
-                        <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
-                            <i data-lucide="trash-2" class="h-5 w-5"></i>
-                        </button>
                     </div>
                 `;
                 expenseList.appendChild(card);
@@ -963,17 +978,15 @@
         
         // --- Listeners de Eventos da UI ---
         
-        // Listener de eventos na lista de contas (para botões de Pagar e Excluir)
         expenseList.addEventListener('click', (e) => {
             const target = e.target.closest('button, form');
             if (!target) return;
             const action = target.dataset.action;
 
-            // MODIFICADO: Não é mais um formulário, é um botão
             if (target.tagName === 'BUTTON' && action === 'pay') {
                 e.preventDefault();
                 const expenseId = target.dataset.expenseId;
-                handlePayExpense(expenseId); // Chama a função modificada
+                handlePayExpense(expenseId); 
             }
             if (target.tagName === 'BUTTON' && action === 'delete') {
                 const expenseId = target.dataset.expenseId;
@@ -984,7 +997,6 @@
                 const paymentId = target.dataset.paymentId;
                 handleUndoPayment(paymentId);
             }
-            // NOVO: Listener para o botão de editar
             if (target.tagName === 'BUTTON' && action === 'edit') {
                 const expenseId = target.dataset.expenseId;
                 const expense = fixedExpensesCache.find(e => e.id === expenseId);
@@ -994,7 +1006,7 @@
             }
         });
 
-        // NOVO: Listeners dos botões de Mês
+        // Listeners dos botões de Mês
         prevMonthBtn.addEventListener('click', () => {
             selectedDate.setMonth(selectedDate.getMonth() - 1);
             currentMonthEl.textContent = getMonthYearName(selectedDate);
