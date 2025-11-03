@@ -1,1028 +1,1033 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro Pessoal</title>
-    <!-- Carrega o Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carrega os ícones do Lucide -->
-    <script src="https://unpkg.com/lucide-icons@latest/dist/lucide.min.js"></script>
-    <!-- Carrega o Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Estilo da fonte Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .loader {
-            border-top-color: #3498db;
-            -webkit-animation: spinner 1.5s linear infinite;
-            animation: spinner 1.5s linear infinite;
-        }
-        @-webkit-keyframes spinner {
-            0% { -webkit-transform: rotate(0deg); }
-            100% { -webkit-transform: rotate(360deg); }
-        }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Garante que o gráfico não fique gigante */
-        #dashboard-section canvas {
-            max-height: 400px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro Pessoal</title>
+    <!-- Carrega o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 
+        *** CORREÇÃO 1: Alterado de 'lucide-icons@latest' para 'lucide@latest' ***
+        Este é o script que faz a substituição dos ícones.
+    -->
+    <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script>
+    
+    <!-- Carrega o Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Estilo da fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @-webkit-keyframes spinner {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Garante que o gráfico não fique gigante */
+        #dashboard-section canvas {
+            max-height: 400px;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <!-- Spinner de Carregamento Principal -->
-    <div id="loading-spinner" class="flex justify-center items-center h-screen">
-        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
-    </div>
-
-    <!-- Container de Autenticação (Login/Registro) -->
-    <div id="auth-container" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl border border-gray-200">
-            
-            <!-- Formulário de Login (inicialmente visível) -->
-            <form id="login-form">
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
-                <div id="login-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
-                <div class="space-y-4">
-                    <div>
-                        <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="login-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label for="login-password" class="block text-sm font-medium text-gray-700">Senha</label>
-                        <input type="password" id="login-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center mt-6">
-                    Entrar
-                </button>
-                <p class="text-center text-sm text-gray-600 mt-4">
-                    Não tem uma conta? 
-                    <button type="button" id="show-register" class="font-medium text-blue-600 hover:underline">Registre-se</button>
-                </p>
-            </form>
-
-            <!-- Formulário de Registro (inicialmente oculto) -->
-            <form id="register-form" class="hidden">
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Criar Conta</h2>
-                <div id="register-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
-                <div class="space-y-4">
-                    <div>
-                        <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="register-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label for="register-password" class="block text-sm font-medium text-gray-700">Senha</label>
-                        <input type="password" id="register-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label for="register-confirm-password" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
-                        <input type="password" id="register-confirm-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center mt-6">
-                    Criar Conta
-                </button>
-                <p class="text-center text-sm text-gray-600 mt-4">
-                    Já tem uma conta? 
-                    <button type="button" id="show-login" class="font-medium text-blue-600 hover:underline">Faça Login</button>
-                </p>
-            </form>
-
-        </div>
-    </div>
-    
-    <!-- Container Principal do Aplicativo (Oculto até o login) -->
-    <main id="app-container" class="hidden container mx-auto max-w-4xl p-4 md:p-8">
-        <header class="mb-8">
-            <div class="flex justify-between items-center flex-wrap gap-4">
-                <h1 class="text-4xl font-bold text-gray-800 text-left">Meu Controle</h1>
-                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                    <p class="text-gray-600 text-sm">Usuário: <span id="user-email-display" class="font-mono bg-gray-200 px-2 py-1 rounded">...</span></p>
-                    <button id="logout-button" class="bg-red-500 text-white px-3 py-2 rounded-lg shadow-md font-semibold hover:bg-red-600 transition duration-200 flex items-center justify-center text-sm">
-                        <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
-                        Sair
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Conteúdo do Aplicativo -->
-        <div id="app-content">
-            
-            <!-- Seção de Resumo -->
-            <section id="summary-section" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                    <h3 class="text-sm font-medium text-gray-500">Total Previsto (Mês)</h3>
-                    <p id="total-previsto" class="text-3xl font-semibold text-blue-600">R$ 0,00</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                    <h3 class="text-sm font-medium text-gray-500">Total Pago (Mês)</h3>
-                    <p id="total-pago" class="text-3xl font-semibold text-green-600">R$ 0,00</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                    <h3 class="text-sm font-medium text-gray-500">Restante a Pagar</h3>
-                    <p id="total-restante" class="text-3xl font-semibold text-red-600">R$ 0,00</p>
-                </div>
-            </section>
-
-            <!-- Seção do Dashboard (Gráfico) -->
-            <section id="dashboard-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-semibold mb-4">Composição das Despesas</h2>
-                <div class="relative h-64 md:h-80">
-                    <canvas id="expense-pie-chart"></canvas>
-                </div>
-            </section>
-
-            <!-- Seção para Adicionar Nova Conta Fixa -->
-            <section id="add-expense-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                <h2 class="text-2xl font-semibold mb-4">Adicionar Nova Conta Fixa</h2>
-                <form id="add-expense-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                    <div class="md:col-span-1">
-                        <label for="expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
-                        <input type="text" id="expense-name" placeholder="Ex: Aluguel, Luz, Internet" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="md:col-span-1">
-                        <label for="expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
-                        <input type="number" id="expense-value" step="0.01" placeholder="150.00" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <!-- Campo Dia do Vencimento -->
-                    <div class="md:col-span-1">
-                        <label for="expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</label>
-                        <input type="number" id="expense-due-date" min="1" max="31" placeholder="Ex: 10" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="md:col-span-1">
-                        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center">
-                            <i data-lucide="plus" class="mr-2 h-5 w-5"></i>
-                            Adicionar Conta
-                        </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Seção da Lista de Contas -->
-            <section id="expense-list-section">
-                <!-- Navegação de Mês -->
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-semibold">Minhas Contas</h2>
-                    <div class="flex items-center gap-2">
-                        <button id="prev-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
-                            <i data-lucide="chevron-left" class="h-5 w-5"></i>
-                        </button>
-                        <span id="current-month" class="font-semibold text-lg text-gray-700 w-36 text-center"></span>
-                        <button id="next-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
-                            <i data-lucide="chevron-right" class="h-5 w-5"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="expense-list" class="space-y-4">
-                    <!-- Contas serão injetadas aqui pelo JavaScript -->
-                    <p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>
-                </div>
-            </section>
-
-        </div>
-    </main>
-
-    <!-- Modal de Alerta Customizado (substituto do alert()) -->
-    <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white max-w-sm w-full p-6 rounded-xl shadow-2xl transform transition-all scale-95 opacity-0" id="alert-modal-content">
-            <div class="flex items-center">
-                <div id="alert-icon-container" class="mr-4">
-                    <!-- Ícone será injetado aqui -->
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-lg font-semibold" id="alert-title">Sucesso!</h4>
-                    <p class="text-sm text-gray-600" id="alert-message">Operação realizada.</p>
-                </div>
-            </div>
-            <button id="alert-close-btn" class="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-                Fechar
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal de Edição -->
-    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white max-w-md w-full p-6 rounded-xl shadow-2xl transform transition-all scale-95 opacity-0" id="edit-modal-content">
-            <h3 class="text-2xl font-semibold mb-6">Editar Conta Fixa</h3>
-            <form id="edit-expense-form">
-                <input type="hidden" id="edit-expense-id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="edit-expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
-                        <input type="text" id="edit-expense-name" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label for="edit-expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
-                        <input type="number" id="edit-expense-value" step="0.01" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label for="edit-expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</dlabel>
-                        <input type="number" id="edit-expense-due-date" min="1" max="31" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                </div>
-                <div class="mt-6 flex gap-4">
-                    <button type="button" id="edit-cancel-btn" class="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:outline-none">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none">
-                        Salvar Alterações
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
-    <!-- Scripts do Firebase (MANDATÓRIO) -->
-    <script type="module">
-        // Importações do Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged,
-            setPersistence,
-            browserLocalPersistence,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Importações do Firestore (corrigido da v5)
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            setDoc, 
-            addDoc, 
-            deleteDoc, 
-            onSnapshot, 
-            collection, 
-            query, 
-            where, 
-            Timestamp,
-            writeBatch,
-            setLogLevel
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Variáveis Globais do Firebase ---
-        let db, auth, userId;
-        let fixedExpensesCache = []; // Cache local das contas fixas
-        let monthlyPaymentsCache = {}; // Cache local dos pagamentos (mapeado por expenseId)
-        
-        // --- Variáveis de estado do App ---
-        let selectedDate = new Date(); // Controla o mês/ano selecionado
-        let expenseChart = null; // Instância do Chart.js
-        let isFirstLoad = true; // Para carregar dados iniciais
-        const chartColors = [ // Cores para o gráfico
-            '#3B82F6', '#10B981', '#EF4444', '#EAB308', '#8B5CF6', '#F97316',
-            '#EC4899', '#6366F1', '#14B8A6', '#F59E0B', '#D946EF', '#0EA5E9'
-        ];
-
-        // Listeners do Firestore (para podermos "desligar" no logout)
-        let expensesListener = null;
-        let paymentsListener = null;
-
-        // --- Configuração do Firebase (Suas Chaves) ---
-        const firebaseConfig = {
-          apiKey: "AIzaSyCkhSVSUsdhWL1SJi6fs2jkZDvWiFZ5zkw",
-          authDomain: "meu-controle-financeiro-86f94.firebaseapp.com",
-          projectId: "meu-controle-financeiro-86f94",
-          storageBucket: "meu-controle-financeiro-86f94.firebasestorage.app",
-          messagingSenderId: "688021518065",
-          appId: "1:688021518065:web:c703e1549bfdfeb7995b50"
-        };
-        
-        // --- Elementos da UI ---
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const authContainer = document.getElementById('auth-container');
-        const appContainer = document.getElementById('app-container');
-        
-        // Forms de Auth
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const showLoginBtn = document.getElementById('show-login');
-        const showRegisterBtn = document.getElementById('show-register');
-        const loginError = document.getElementById('login-error');
-        const registerError = document.getElementById('register-error');
-        
-        // App Principal
-        const userEmailDisplay = document.getElementById('user-email-display');
-        const logoutButton = document.getElementById('logout-button');
-        const addExpenseForm = document.getElementById('add-expense-form');
-        const expenseNameInput = document.getElementById('expense-name');
-        const expenseValueInput = document.getElementById('expense-value');
-        const expenseDueDateInput = document.getElementById('expense-due-date');
-        const expenseList = document.getElementById('expense-list');
-        const totalPrevistoEl = document.getElementById('total-previsto');
-        const totalPagoEl = document.getElementById('total-pago');
-        const totalRestanteEl = document.getElementById('total-restante');
-        const currentMonthEl = document.getElementById('current-month');
-        const prevMonthBtn = document.getElementById('prev-month-btn');
-        const nextMonthBtn = document.getElementById('next-month-btn');
-        
-        // Modal de Alerta
-        const alertModal = document.getElementById('alert-modal');
-        const alertModalContent = document.getElementById('alert-modal-content');
-        const alertTitle = document.getElementById('alert-title');
-        const alertMessage = document.getElementById('alert-message');
-        const alertIconContainer = document.getElementById('alert-icon-container');
-        const alertCloseBtn = document.getElementById('alert-close-btn');
-
-        // Elementos do Modal de Edição
-        const editModal = document.getElementById('edit-modal');
-        const editModalContent = document.getElementById('edit-modal-content');
-        const editExpenseForm = document.getElementById('edit-expense-form');
-        const editExpenseId = document.getElementById('edit-expense-id');
-        const editExpenseName = document.getElementById('edit-expense-name');
-        const editExpenseValue = document.getElementById('edit-expense-value');
-        const editExpenseDueDate = document.getElementById('edit-expense-due-date');
-        const editCancelBtn = document.getElementById('edit-cancel-btn');
-
-        alertCloseBtn.addEventListener('click', () => {
-            alertModalContent.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => alertModal.classList.add('hidden'), 150);
-        });
-
-        // Funções do Modal de Edição
-        function openEditModal(expense) {
-            editExpenseId.value = expense.id;
-            editExpenseName.value = expense.name;
-            editExpenseValue.value = expense.estimatedValue;
-            editExpenseDueDate.value = expense.dueDate || ''; // Pega o dueDate
-            
-            editModal.classList.remove('hidden');
-            setTimeout(() => {
-                editModalContent.classList.remove('scale-95', 'opacity-0');
-            }, 50);
-        }
-
-        function closeEditModal() {
-            editModalContent.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                editModal.classList.add('hidden');
-                editExpenseForm.reset(); // Limpa o formulário
-            }, 150);
-        }
-
-        editCancelBtn.addEventListener('click', closeEditModal);
-
-        // --- Funções de Alerta ---
-        function showAlert(message, isError = false) {
-            alertTitle.textContent = isError ? 'Erro!' : 'Sucesso!';
-            alertMessage.textContent = message;
-
-            if (isError) {
-                alertIconContainer.innerHTML = `<i data-lucide="alert-triangle" class="h-8 w-8 text-red-500"></i>`;
-                alertCloseBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                alertCloseBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-            } else {
-                alertIconContainer.innerHTML = `<i data-lucide="check-circle" class="h-8 w-8 text-green-500"></i>`;
-                alertCloseBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-                alertCloseBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            }
-            // Importante: Renderiza o ícone do modal
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-            alertModal.classList.remove('hidden');
-            setTimeout(() => {
-                alertModalContent.classList.remove('scale-95', 'opacity-0');
-            }, 50);
-        }
-
-        // Mostra erros nos formulários de login/registro
-        function showAuthError(type, message) {
-            const el = (type === 'login') ? loginError : registerError;
-            el.textContent = message;
-            el.classList.remove('hidden');
-        }
-        
-        // Limpa erros
-        function clearAuthErrors() {
-            loginError.classList.add('hidden');
-            registerError.classList.add('hidden');
-        }
-
-        // --- Funções Auxiliares ---
-        function getMonthYear(date) {
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
-            return `${month}-${year}`;
-        }
-        function getMonthYearName(date) {
-            return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-        }
-        function formatCurrency(value) {
-            return parseFloat(value || 0).toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            });
-        }
-        function getCollectionPath(collectionName) {
-            if (!userId) {
-                console.error("User ID não definido.");
-                return null;
-            }
-            return `users/${userId}/${collectionName}`;
-        }
-
-        // --- Inicialização do Firebase ---
-        async function initializeFirebase() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug'); 
-                await setPersistence(auth, browserLocalPersistence);
-                setupAuthListener();
-            } catch (error) {
-                console.error("Erro inicializando o Firebase:", error);
-                loadingSpinner.innerHTML = `<p class="text-red-500">Erro ao carregar. Tente recarregar a página.</p>`;
-            }
-        }
-
-        // --- Gerenciamento de Autenticação ---
-        function setupAuthListener() {
-            onAuthStateChanged(auth, (user) => {
-                loadingSpinner.classList.add('hidden'); // Esconde o spinner principal
-                
-                if (user) {
-                    // Usuário está logado
-                    userId = user.uid;
-                    userEmailDisplay.textContent = user.email;
-                    currentMonthEl.textContent = getMonthYearName(selectedDate);
-                    
-                    authContainer.classList.add('hidden');
-                    appContainer.classList.remove('hidden');
-                    
-                    loadData(); // Carrega os dados do usuário
-                    
-                    // Renderiza ícones do app (com atraso para garantir)
-                    setTimeout(() => {
-                        if (window.lucide) lucide.createIcons();
-                    }, 50);
-
-                } else {
-                    // Usuário está deslogado
-                    userId = null;
-                    authContainer.classList.remove('hidden');
-                    appContainer.classList.add('hidden');
-                    
-                    detachDataListeners(); // Para de ouvir dados antigos
-                    clearLocalCache(); // Limpa dados da tela
-                    
-                    // Renderiza ícones do auth (com atraso para garantir)
-                    setTimeout(() => {
-                        if (window.lucide) lucide.createIcons();
-                    }, 50);
-                }
-            });
-        }
-        
-        // Login
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearAuthErrors();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                console.error("Erro de login:", error.code);
-                showAuthError('login', 'Email ou senha inválidos.');
-            }
-        });
-        
-        // Registro
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearAuthErrors();
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm-password').value;
-
-            if (password !== confirmPassword) {
-                showAuthError('register', 'As senhas não conferem.');
-                return;
-            }
-            
-            try {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                console.error("Erro de registro:", error.code);
-                if (error.code === 'auth/email-already-in-use') {
-                    showAuthError('register', 'Este email já está em uso.');
-                } else if (error.code === 'auth/weak-password') {
-                    showAuthError('register', 'A senha deve ter pelo menos 6 caracteres.');
-                } else {
-                    showAuthError('register', 'Erro ao criar conta.');
-                }
-            }
-        });
-
-        // Logout
-        logoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Erro ao sair:", error);
-                showAlert("Erro ao tentar sair.", true);
-            }
-        });
-
-        // Alternar entre forms de login/registro
-        showRegisterBtn.addEventListener('click', () => {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-            clearAuthErrors();
-        });
-        showLoginBtn.addEventListener('click', () => {
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-            clearAuthErrors();
-        });
-        
-        // --- Gerenciamento de Dados (Firestore) ---
-        
-        function detachDataListeners() {
-            if (expensesListener) {
-                expensesListener(); 
-                expensesListener = null;
-                console.log("Listener de Contas Fixas desligado.");
-            }
-            if (paymentsListener) {
-                paymentsListener();
-                paymentsListener = null;
-                console.log("Listener de Pagamentos desligado.");
-            }
-        }
-        
-        function clearLocalCache() {
-            fixedExpensesCache = [];
-            monthlyPaymentsCache = {};
-            selectedDate = new Date(); 
-            isFirstLoad = true; 
-            if (expenseChart) {
-                expenseChart.destroy();
-                expenseChart = null;
-            }
-            renderApp(); 
-        }
-
-        async function loadData() {
-            if (!db || !userId) return;
-            
-            detachDataListeners();
-            
-            const expensesPath = getCollectionPath('fixedExpenses');
-            if (!expensesPath) return;
-
-            // 1. Listener para Contas Fixas
-            const qExpenses = query(collection(db, expensesPath));
-            expensesListener = onSnapshot(qExpenses, (querySnapshot) => {
-                console.log("Snapshot de Contas Fixas recebido.");
-                fixedExpensesCache = [];
-                querySnapshot.forEach((doc) => {
-                    fixedExpensesCache.push({ id: doc.id, ...doc.data() });
-                });
-                
-                if (querySnapshot.empty && isFirstLoad) {
-                    addPredefinedExpenses();
-                }
-                isFirstLoad = false; 
-
-                fixedExpensesCache.sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
-                renderApp();
-            }, (error) => {
-                console.error("Erro ao ouvir contas fixas: ", error);
-                showAlert("Erro ao carregar contas fixas.", true);
-            });
-
-            // 2. Listener para Pagamentos do Mês
-            const paymentsPath = getCollectionPath('monthlyPayments');
-            const currentMonth = getMonthYear(selectedDate);
-            const qPayments = query(collection(db, paymentsPath), where("monthYear", "==", currentMonth));
-            paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
-                console.log("Snapshot de Pagamentos recebido.");
-                monthlyPaymentsCache = {};
-                querySnapshot.forEach((doc) => {
-                    const payment = { id: doc.id, ...doc.data() };
-                    monthlyPaymentsCache[payment.expenseId] = payment;
-                });
-                renderApp();
-            }, (error) => {
-                console.error("Erro ao ouvir pagamentos: ", error);
-                showAlert("Erro ao carregar pagamentos do mês.", true);
-            });
-        }
-
-        // --- Lógica do Aplicativo (CRUD) ---
-        
-        // Adiciona uma nova conta fixa
-        addExpenseForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = expenseNameInput.value.trim();
-            const estimatedValue = parseFloat(expenseValueInput.value);
-            const dueDate = parseInt(expenseDueDateInput.value); 
-
-            if (!name || isNaN(estimatedValue) || estimatedValue <= 0) {
-                showAlert("Por favor, preencha o nome e um valor válido.", true);
-                return;
-            }
-
-            if (isNaN(dueDate) || dueDate < 1 || dueDate > 31) {
-                showAlert("Por favor, insira um dia de vencimento válido (1-31).", true);
-                return;
-            }
-
-            try {
-                const expensesPath = getCollectionPath('fixedExpenses');
-                await addDoc(collection(db, expensesPath), {
-                    name: name,
-                    estimatedValue: estimatedValue,
-                    dueDate: dueDate, 
-                    createdAt: Timestamp.now()
-                });
-                
-                showAlert(`Conta "${name}" adicionada com sucesso!`);
-                addExpenseForm.reset();
-            } catch (error) {
-                console.error("Erro ao adicionar conta:", error);
-                showAlert("Erro ao salvar a nova conta.", true);
-            }
-        });
-
-        // Adiciona contas predefinidas (chamado uma vez)
-        async function addPredefinedExpenses() {
-            const expensesPath = getCollectionPath('fixedExpenses');
-            const batch = writeBatch(db);
-
-            const predefined = [
-                { name: "Internet", estimatedValue: 100, dueDate: 10 },
-                { name: "Luz", estimatedValue: 150, dueDate: 15 },
-                { name: "Gás", estimatedValue: 80, dueDate: 5 },
-                { name: "Celular", estimatedValue: 50, dueDate: 20 },
-                { name: "IPTU", estimatedValue: 120, dueDate: 10 },
-                { name: "Canva", estimatedValue: 35, dueDate: 25 },
-            ];
-
-            predefined.forEach(expense => {
-                const docRef = doc(collection(db, expensesPath)); 
-                batch.set(docRef, { ...expense, createdAt: Timestamp.now() });
-            });
-
-            try {
-                await batch.commit();
-                console.log("Contas predefinidas adicionadas!");
-            } catch (error) {
-                console.error("Erro ao adicionar contas predefinidas: ", error);
-            }
-        }
-
-        // Marcar como Pago
-        async function handlePayExpense(expenseId) {
-            const expense = fixedExpensesCache.find(e => e.id === expenseId);
-            if (!expense) {
-                showAlert("Conta não encontrada.", true);
-                return;
-            }
-            const paidValue = expense.estimatedValue; 
-
-            if (isNaN(paidValue) || paidValue <= 0) {
-                showAlert("O valor previsto da conta é inválido.", true);
-                return;
-            }
-            if (monthlyPaymentsCache[expenseId]) {
-                showAlert("Esta conta já foi paga este mês.", true);
-                return;
-            }
-            try {
-                const paymentsPath = getCollectionPath('monthlyPayments');
-                await addDoc(collection(db, paymentsPath), {
-                    expenseId: expenseId,
-                    paidValue: paidValue,
-                    monthYear: getMonthYear(selectedDate), 
-                    status: 'paid',
-                    paidAt: Timestamp.now()
-                });
-                showAlert("Conta marcada como paga!");
-            } catch (error) {
-                console.error("Erro ao registrar pagamento:", error);
-                showAlert("Erro ao salvar o pagamento.", true);
-            }
-        }
-
-        // Exclui uma conta fixa
-        async function handleDeleteExpense(expenseId, expenseName) {
-            // Adicionar confirmação seria ideal, mas alert() é proibido.
-            // Por enquanto, exclui direto.
-            try {
-                const docPath = doc(db, getCollectionPath('fixedExpenses'), expenseId);
-                await deleteDoc(docPath);
-                showAlert(`Conta "${expenseName}" excluída com sucesso.`);
-            } catch (error) {
-                console.error("Erro ao excluir conta:", error);
-                showAlert("Erro ao excluir a conta.", true);
-            }
-        }
-        
-        // Edita uma conta fixa
-        editExpenseForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = editExpenseId.value;
-            const name = editExpenseName.value.trim();
-            const estimatedValue = parseFloat(editExpenseValue.value);
-            const dueDate = parseInt(editExpenseDueDate.value);
-
-            if (!id || !name || isNaN(estimatedValue) || estimatedValue <= 0 || isNaN(dueDate) || dueDate < 1 || dueDate > 31) {
-                showAlert("Por favor, preencha todos os campos corretamente.", true);
-                return;
-            }
-
-            try {
-                const docPath = doc(db, getCollectionPath('fixedExpenses'), id);
-                await setDoc(docPath, {
-                    name: name,
-                    estimatedValue: estimatedValue,
-                    dueDate: dueDate,
-                }, { merge: true }); // Merge: true preserva o 'createdAt'
-
-                showAlert(`Conta "${name}" atualizada com sucesso!`);
-                closeEditModal();
-            } catch (error) {
-                console.error("Erro ao editar conta:", error);
-                showAlert("Erro ao salvar as alterações.", true);
-            }
-        });
-
-        // Desfaz um pagamento
-        async function handleUndoPayment(paymentId) {
-             if (!paymentId) {
-                showAlert("ID do pagamento não encontrado.", true);
-                return;
-            }
-            try {
-                const docPath = doc(db, getCollectionPath('monthlyPayments'), paymentId);
-                await deleteDoc(docPath);
-                showAlert("Pagamento desfeito com sucesso.");
-            } catch (error) {
-                console.error("Erro ao desfazer pagamento:", error);
-                showAlert("Erro ao desfazer o pagamento.", true);
-            }
-        }
-
-        // --- Renderização da UI ---
-
-        function renderApp() {
-            if (appContainer.classList.contains('hidden')) return; 
-
-            renderExpenseList();
-            updateSummary();
-            renderDashboard(); 
-            
-            // CORREÇÃO: Atraso para garantir que o DOM esteja pronto para os ícones
-            setTimeout(() => {
-                if (window.lucide) {
-                    lucide.createIcons();
-                    console.log("Ícones Lucide renderizados.");
-                } else {
-                    console.error("Biblioteca Lucide não carregada.");
-                }
-            }, 0); // 0ms é suficiente para mover para o próximo 'tick'
-        }
-
-        // Atualiza o card de resumo
-        function updateSummary() {
-            let totalPrevisto = 0;
-            let totalPago = 0;
-
-            fixedExpensesCache.forEach(expense => {
-                totalPrevisto += expense.estimatedValue;
-                const payment = monthlyPaymentsCache[expense.id];
-                if (payment) {
-                    totalPago += payment.paidValue;
-                }
-            });
-
-            const totalRestante = totalPrevisto - totalPago;
-            totalPrevistoEl.textContent = formatCurrency(totalPrevisto);
-            totalPagoEl.textContent = formatCurrency(totalPago);
-            totalRestanteEl.textContent = formatCurrency(totalRestante);
-            totalRestanteEl.classList.toggle('text-red-600', totalRestante > 0);
-            totalRestanteEl.classList.toggle('text-green-600', totalRestante <= 0);
-        }
-
-        // Renderiza o Gráfico de Pizza
-        function renderDashboard() {
-            const ctx = document.getElementById('expense-pie-chart');
-            if (!ctx) return; 
-
-            // Filtra contas com valor 0 para não poluir o gráfico
-            const chartData = fixedExpensesCache.filter(e => e.estimatedValue > 0);
-            const labels = chartData.map(e => e.name);
-            const data = chartData.map(e => e.estimatedValue);
-            
-            const backgroundColors = labels.map((_, i) => chartColors[i % chartColors.length]);
-
-            if (expenseChart) {
-                expenseChart.destroy();
-            }
-
-            expenseChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Valor Previsto',
-                        data: data,
-                        backgroundColor: backgroundColors,
-                        borderWidth: 2,
-                        borderColor: '#f9fafb' // bg-gray-50
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    family: "'Inter', sans-serif"
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += formatCurrency(context.parsed);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Renderiza a lista de contas
-        function renderExpenseList() {
-            expenseList.innerHTML = ''; 
-
-            if (fixedExpensesCache.length === 0) {
-                expenseList.innerHTML = `<p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>`;
-                return;
-            }
-
-            fixedExpensesCache.forEach(expense => {
-                const payment = monthlyPaymentsCache[expense.id];
-                const isPaid = !!payment;
-
-                // Lógica de Status
-                const today = new Date();
-                today.setHours(0,0,0,0); // Zera a hora para comparações
-                const selectedDateOnly = new Date(selectedDate);
-                selectedDateOnly.setHours(0,0,0,0);
-                
-                const currentDay = new Date().getDate();
-                const isCurrentMonth = selectedDate.getMonth() === new Date().getMonth() && selectedDate.getFullYear() === new Date().getFullYear();
-                const isFutureMonth = selectedDateOnly > today;
-                
-                let status = 'Pendente';
-                let statusColor = 'bg-gray-500 text-gray-100'; // Pendente
-                
-                if (isPaid) {
-                    status = 'Pago';
-                    statusColor = 'bg-green-600 text-green-100'; // Pago
-                } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
-                    status = 'Atrasado';
-                    statusColor = 'bg-red-600 text-red-100'; // Atrasado
-                }
-
-                const card = document.createElement('div');
-                card.className = `bg-white p-4 rounded-lg shadow-md border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isPaid ? 'border-green-300 bg-green-50 opacity-90' : 'border-gray-200'}`;
-                
-                let paymentHtml = '';
-                if (isPaid) {
-                    paymentHtml = `
-                        <div class="flex-shrink-0 text-right w-full md:w-auto space-y-2">
-                            <div class="flex items-center justify-end text-green-700">
-                                <i data-lucide="check-circle" class="mr-2 h-5 w-5"></i>
-                                <span class="font-semibold">Pago: ${formatCurrency(payment.paidValue)}</span>
-                            </div>
-                             <button data-action="undo" data-payment-id="${payment.id}" class="w-full text-xs text-blue-600 hover:underline">Marcar como Pendente</button>
-                        </div>
-                    `;
-                } else {
-                    if (isFutureMonth) {
-                         paymentHtml = `<p class="text-sm text-gray-500 text-right w-full md:w-auto">Disponível em ${getMonthYearName(selectedDate)}</p>`;
-                    } else {
-                        paymentHtml = `
-                            <div class="w-full md:w-auto">
-                                <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
-                                    <i data-lucide="check" class="mr-1 h-4 w-4"></i>
-                                    Marcar como Pago
-                                </button>
-                            </div>
-                        `;
-                    }
-                }
-
-                // *** CORREÇÃO DE LAYOUT (v5.2) ***
-                // Movi os botões de ação para o cabeçalho do card
-                card.innerHTML = `
-                    <div class="flex-1 w-full md:w-auto">
-                        <div class="flex items-center justify-between gap-4">
-                            <h3 class="text-lg font-semibold text-gray-800">${expense.name}</h3>
-                            
-                            <!-- Botões movidos para cá -->
-                            <div class="flex items-center gap-3 flex-shrink-0">
-                                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}">${status}</span>
-                                <div class="flex gap-2 text-gray-400">
-                                    <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors">
-                                        <i data-lucide="pencil" class="h-5 w-5"></i>
-                                    </button>
-                                    <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
-                                        <i data-lucide="trash-2" class="h-5 w-5"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm text-gray-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
-                        <p class="text-sm text-gray-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
-                    </div>
-                    <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-200 md:pl-4">
-                        ${paymentHtml}
-                    </div>
-                `;
-                expenseList.appendChild(card);
-            });
-        }
-        
-        // --- Listeners de Eventos da UI ---
-        
-        expenseList.addEventListener('click', (e) => {
-            const target = e.target.closest('button, form');
-            if (!target) return;
-            const action = target.dataset.action;
-
-            if (target.tagName === 'BUTTON' && action === 'pay') {
-                e.preventDefault();
-                const expenseId = target.dataset.expenseId;
-                handlePayExpense(expenseId); 
-            }
-            if (target.tagName === 'BUTTON' && action === 'delete') {
-                const expenseId = target.dataset.expenseId;
-                const expenseName = target.dataset.expenseName;
-                handleDeleteExpense(expenseId, expenseName);
-            }
-            if (target.tagName === 'BUTTON' && action === 'undo') {
-                const paymentId = target.dataset.paymentId;
-                handleUndoPayment(paymentId);
-            }
-            if (target.tagName === 'BUTTON' && action === 'edit') {
-                const expenseId = target.dataset.expenseId;
-                const expense = fixedExpensesCache.find(e => e.id === expenseId);
-                if (expense) {
-                    openEditModal(expense);
-                }
-            }
-        });
-
-        // Listeners dos botões de Mês
-        prevMonthBtn.addEventListener('click', () => {
-            selectedDate.setMonth(selectedDate.getMonth() - 1);
-            currentMonthEl.textContent = getMonthYearName(selectedDate);
-            loadData(); // Recarrega os dados para o novo mês
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            selectedDate.setMonth(selectedDate.getMonth() + 1);
-            currentMonthEl.textContent = getMonthYearName(selectedDate);
-            loadData(); // Recarrega os dados para o novo mês
-        });
-
-        // --- Inicialização ---
-        initializeFirebase();
-
-    </script>
+    <!-- Spinner de Carregamento Principal -->
+    <div id="loading-spinner" class="flex justify-center items-center h-screen">
+        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
+    </div>
+
+    <!-- Container de Autenticação (Login/Registro) -->
+    <div id="auth-container" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl border border-gray-200">
+            
+            <!-- Formulário de Login (inicialmente visível) -->
+            <form id="login-form">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
+                <div id="login-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="login-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="login-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center mt-6">
+                    Entrar
+                </button>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    Não tem uma conta? 
+                    <button type="button" id="show-register" class="font-medium text-blue-600 hover:underline">Registre-se</button>
+                </p>
+            </form>
+
+            <!-- Formulário de Registro (inicialmente oculto) -->
+            <form id="register-form" class="hidden">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Criar Conta</h2>
+                <div id="register-error" class="text-red-500 text-sm mb-4 text-center hidden"></div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="register-email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="register-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="register-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="register-confirm-password" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                        <input type="password" id="register-confirm-password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center mt-6">
+                    Criar Conta
+                </button>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    Já tem uma conta? 
+                    <button type="button" id="show-login" class="font-medium text-blue-600 hover:underline">Faça Login</button>
+s              </p>
+            </form>
+
+        </div>
+    </div>
+    
+    <!-- Container Principal do Aplicativo (Oculto até o login) -->
+    <main id="app-container" class="hidden container mx-auto max-w-4xl p-4 md:p-8">
+        <header class="mb-8">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <h1 class="text-4xl font-bold text-gray-800 text-left">Meu Controle</h1>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <p class="text-gray-600 text-sm">Usuário: <span id="user-email-display" class="font-mono bg-gray-200 px-2 py-1 rounded">...</span></p>
+                    <button id="logout-button" class="bg-red-500 text-white px-3 py-2 rounded-lg shadow-md font-semibold hover:bg-red-600 transition duration-200 flex items-center justify-center text-sm">
+                        <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
+                        Sair
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo do Aplicativo -->
+        <div id="app-content">
+            
+            <!-- Seção de Resumo -->
+            <section id="summary-section" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500">Total Previsto (Mês)</h3>
+                    <p id="total-previsto" class="text-3xl font-semibold text-blue-600">R$ 0,00</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500">Total Pago (Mês)</h3>
+                    <p id="total-pago" class="text-3xl font-semibold text-green-600">R$ 0,00</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-500">Restante a Pagar</h3>
+                    <p id="total-restante" class="text-3xl font-semibold text-red-600">R$ 0,00</p>
+                </div>
+            </section>
+
+            <!-- Seção do Dashboard (Gráfico) -->
+            <section id="dashboard-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-semibold mb-4">Composição das Despesas</h2>
+                <div class="relative h-64 md:h-80">
+                    <canvas id="expense-pie-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Seção para Adicionar Nova Conta Fixa -->
+            <section id="add-expense-section" class="mb-8 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-semibold mb-4">Adicionar Nova Conta Fixa</h2>
+                <form id="add-expense-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="md:col-span-1">
+          _B_R_               <label for="expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
+                        <input type="text" id="expense-name" placeholder="Ex: Aluguel, Luz, Internet" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
+                        <input type="number" id="expense-value" step="0.01" placeholder="150.00" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <!-- Campo Dia do Vencimento -->
+                    <div class="md:col-span-1">
+                        <label for="expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</label>
+                        <input type="number" id="expense-due-date" min="1" max="31" placeholder="Ex: 10" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="md:col-span-1">
+                        <button type="submit" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg shadow-md font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                            <i data-lucide="plus" class="mr-2 h-5 w-5"></i>
+                            Adicionar Conta
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Seção da Lista de Contas -->
+            <section id="expense-list-section">
+                <!-- Navegação de Mês -->
+              _B_R_ <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold">Minhas Contas</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="prev-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
+                            <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                        </button>
+                        <span id="current-month" class="font-semibold text-lg text-gray-700 w-36 text-center"></span>
+                        <button id="next-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
+                            <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="expense-list" class="space-y-4">
+                    <!-- Contas serão injetadas aqui pelo JavaScript -->
+                    <p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal de Alerta Customizado (substituto do alert()) -->
+    <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-sm w-full p-6 rounded-xl shadow-2xl transform transition-all scale-95 opacity-0" id="alert-modal-content">
+            <div class="flex items-center">
+                <div id="alert-icon-container" class="mr-4">
+                    <!-- Ícone será injetado aqui -->
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-lg font-semibold" id="alert-title">Sucesso!</h4>
+                    <p class="text-sm text-gray-600" id="alert-message">Operação realizada.</p>
+                </div>
+            </div>
+            <button id="alert-close-btn" class="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Fechar
+            </button>
+        </div>
+  D_ </div>
+
+    <!-- Modal de Edição -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-md w-full p-6 rounded-xl shadow-2xl transform transition-all scale-95 opacity-0" id="edit-modal-content">
+            <h3 class="text-2xl font-semibold mb-6">Editar Conta Fixa</h3>
+            <form id="edit-expense-form">
+                <input type="hidden" id="edit-expense-id">
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
+                        <input type="text" id="edit-expense-name" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit-expense-value" class="block text-sm font-medium text-gray-700">Valor Previsto (R$)</label>
+                        <input type="number" id="edit-expense-value" step="0.01" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="edit-expense-due-date" class="block text-sm font-medium text-gray-700">Dia do Vencimento</dlabel>
+                        <input type="number" id="edit-expense-due-date" min="1" max="31" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-4">
+                    <button type="button" id="edit-cancel-btn" class="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:outline-none">
+e                     Cancelar
+                    </button>
+                    <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+md       </div>
+    </div>
+
+
+    <!-- Scripts do Firebase (MANDATÓRIO) -->
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            setPersistence,
+            browserLocalPersistence,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Importações do Firestore (corrigido da v5)
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            addDoc, 
+            deleteDoc, 
+            onSnapshot, 
+            collection, 
+            query, 
+            where, 
+            Timestamp,
+            writeBatch,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Variáveis Globais do Firebase ---
+        let db, auth, userId;
+        let fixedExpensesCache = []; // Cache local das contas fixas
+        let monthlyPaymentsCache = {}; // Cache local dos pagamentos (mapeado por expenseId)
+        
+        // --- Variáveis de estado do App ---
+        let selectedDate = new Date(); // Controla o mês/ano selecionado
+        let expenseChart = null; // Instância do Chart.js
+        let isFirstLoad = true; // Para carregar dados iniciais
+        const chartColors = [ // Cores para o gráfico
+            '#3B82F6', '#10B981', '#EF4444', '#EAB308', '#8B5CF6', '#F97316',
+            '#EC4899', '#6366F1', '#14B8A6', '#F59E0B', '#D946EF', '#0EA5E9'
+        ];
+
+        // Listeners do Firestore (para podermos "desligar" no logout)
+        let expensesListener = null;
+        let paymentsListener = null;
+
+        // --- Configuração do Firebase (Suas Chaves) ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyCkhSVSUsdhWL1SJi6fs2jkZDvWiFZ5zkw",
+          authDomain: "meu-controle-financeiro-86f94.firebaseapp.com",
+          projectId: "meu-controle-financeiro-86f94",
+          storageBucket: "meu-controle-financeiro-86f94.firebasestorage.app",
+          messagingSenderId: "688021518065",
+          appId: "1:688021518065:web:c703e1549bfdfeb7995b50"
+        };
+        
+        // --- Elementos da UI ---
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        
+        // Forms de Auth
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showLoginBtn = document.getElementById('show-login');
+        const showRegisterBtn = document.getElementById('show-register');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
+        
+        // App Principal
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const logoutButton = document.getElementById('logout-button');
+        const addExpenseForm = document.getElementById('add-expense-form');
+        const expenseNameInput = document.getElementById('expense-name');
+        const expenseValueInput = document.getElementById('expense-value');
+        const expenseDueDateInput = document.getElementById('expense-due-date');
+        const expenseList = document.getElementById('expense-list');
+        const totalPrevistoEl = document.getElementById('total-previsto');
+        const totalPagoEl = document.getElementById('total-pago');
+        const totalRestanteEl = document.getElementById('total-restante');
+        const currentMonthEl = document.getElementById('current-month');
+        const prevMonthBtn = document.getElementById('prev-month-btn');
+        const nextMonthBtn = document.getElementById('next-month-btn');
+        
+        // Modal de Alerta
+        const alertModal = document.getElementById('alert-modal');
+        const alertModalContent = document.getElementById('alert-modal-content');
+        const alertTitle = document.getElementById('alert-title');
+        const alertMessage = document.getElementById('alert-message');
+        const alertIconContainer = document.getElementById('alert-icon-container');
+        const alertCloseBtn = document.getElementById('alert-close-btn');
+
+        // Elementos do Modal de Edição
+        const editModal = document.getElementById('edit-modal');
+        const editModalContent = document.getElementById('edit-modal-content');
+        const editExpenseForm = document.getElementById('edit-expense-form');
+        const editExpenseId = document.getElementById('edit-expense-id');
+        const editExpenseName = document.getElementById('edit-expense-name');
+        const editExpenseValue = document.getElementById('edit-expense-value');
+        const editExpenseDueDate = document.getElementById('edit-expense-due-date');
+        const editCancelBtn = document.getElementById('edit-cancel-btn');
+
+        alertCloseBtn.addEventListener('click', () => {
+            alertModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => alertModal.classList.add('hidden'), 150);
+        });
+
+        // Funções do Modal de Edição
+        function openEditModal(expense) {
+            editExpenseId.value = expense.id;
+            editExpenseName.value = expense.name;
+            editExpenseValue.value = expense.estimatedValue;
+            editExpenseDueDate.value = expense.dueDate || ''; // Pega o dueDate
+            
+            editModal.classList.remove('hidden');
+            setTimeout(() => {
+                editModalContent.classList.remove('scale-95', 'opacity-0');
+            }, 50);
+        }
+
+        function closeEditModal() {
+            editModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                editModal.classList.add('hidden');
+                editExpenseForm.reset(); // Limpa o formulário
+            }, 150);
+        }
+
+        editCancelBtn.addEventListener('click', closeEditModal);
+
+        // --- Funções de Alerta ---
+        function showAlert(message, isError = false) {
+            alertTitle.textContent = isError ? 'Erro!' : 'Sucesso!';
+            alertMessage.textContent = message;
+
+            if (isError) {
+                alertIconContainer.innerHTML = `<i data-lucide="alert-triangle" class="h-8 w-8 text-red-500"></i>`;
+                alertCloseBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                alertCloseBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            } else {
+                alertIconContainer.innerHTML = `<i data-lucide="check-circle" class="h-8 w-8 text-green-500"></i>`;
+                alertCloseBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                alertCloseBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }
+            // Importante: Renderiza o ícone do modal
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+            alertModal.classList.remove('hidden');
+            setTimeout(() => {
+                alertModalContent.classList.remove('scale-95', 'opacity-0');
+            }, 50);
+        }
+
+        // Mostra erros nos formulários de login/registro
+        function showAuthError(type, message) {
+            const el = (type === 'login') ? loginError : registerError;
+            el.textContent = message;
+            el.classList.remove('hidden');
+        }
+        
+        // Limpa erros
+        function clearAuthErrors() {
+            loginError.classList.add('hidden');
+            registerError.classList.add('hidden');
+        }
+
+        // --- Funções Auxiliares ---
+        function getMonthYear(date) {
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}-${year}`;
+        }
+        function getMonthYearName(date) {
+            return date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+        }
+        function formatCurrency(value) {
+            return parseFloat(value || 0).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+        }
+        function getCollectionPath(collectionName) {
+            if (!userId) {
+                console.error("User ID não definido.");
+                return null;
+            }
+            return `users/${userId}/${collectionName}`;
+        }
+
+        // --- Inicialização do Firebase ---
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug'); 
+                await setPersistence(auth, browserLocalPersistence);
+                setupAuthListener();
+            } catch (error) {
+                console.error("Erro inicializando o Firebase:", error);
+                loadingSpinner.innerHTML = `<p class="text-red-500">Erro ao carregar. Tente recarregar a página.</p>`;
+            }
+        }
+
+        // --- Gerenciamento de Autenticação ---
+        function setupAuthListener() {
+            onAuthStateChanged(auth, (user) => {
+                loadingSpinner.classList.add('hidden'); // Esconde o spinner principal
+                
+                if (user) {
+                    // Usuário está logado
+                    userId = user.uid;
+                    userEmailDisplay.textContent = user.email;
+                    currentMonthEl.textContent = getMonthYearName(selectedDate);
+                    
+                    authContainer.classList.add('hidden');
+                    appContainer.classList.remove('hidden');
+                    
+                    loadData(); // Carrega os dados do usuário
+                    
+                    // Renderiza ícones do app (com atraso para garantir)
+                    setTimeout(() => {
+                        if (window.lucide) lucide.createIcons();
+                    }, 50);
+
+                } else {
+                    // Usuário está deslogado
+                    userId = null;
+                    authContainer.classList.remove('hidden');
+                    appContainer.classList.add('hidden');
+                    
+                    detachDataListeners(); // Para de ouvir dados antigos
+                    clearLocalCache(); // Limpa dados da tela
+                    
+                    // Renderiza ícones do auth (com atraso para garantir)
+                    setTimeout(() => {
+                        if (window.lucide) lucide.createIcons();
+                    }, 50);
+                }
+            });
+        }
+        
+        // Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAuthErrors();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error("Erro de login:", error.code);
+                showAuthError('login', 'Email ou senha inválidos.');
+            }
+        });
+        
+        // Registro
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAuthErrors();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                showAuthError('register', 'As senhas não conferem.');
+                return;
+            }
+            
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error("Erro de registro:", error.code);
+                if (error.code === 'auth/email-already-in-use') {
+                    showAuthError('register', 'Este email já está em uso.');
+                } else if (error.code === 'auth/weak-password') {
+                    showAuthError('register', 'A senha deve ter pelo menos 6 caracteres.');
+                } else {
+                    showAuthError('register', 'Erro ao criar conta.');
+                }
+            }
+        });
+
+        // Logout
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Erro ao sair:", error);
+                showAlert("Erro ao tentar sair.", true);
+            }
+        });
+
+        // Alternar entre forms de login/registro
+        showRegisterBtn.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            clearAuthErrors();
+        });
+        showLoginBtn.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            clearAuthErrors();
+        });
+        
+        // --- Gerenciamento de Dados (Firestore) ---
+        
+        function detachDataListeners() {
+            if (expensesListener) {
+                expensesListener(); 
+                expensesListener = null;
+                console.log("Listener de Contas Fixas desligado.");
+            }
+            if (paymentsListener) {
+                paymentsListener();
+                paymentsListener = null;
+                console.log("Listener de Pagamentos desligado.");
+            }
+        }
+        
+        function clearLocalCache() {
+            fixedExpensesCache = [];
+            monthlyPaymentsCache = {};
+            selectedDate = new Date(); 
+            isFirstLoad = true; 
+            if (expenseChart) {
+                expenseChart.destroy();
+                expenseChart = null;
+            }
+            renderApp(); 
+        }
+
+        async function loadData() {
+            if (!db || !userId) return;
+            
+            detachDataListeners();
+            
+            const expensesPath = getCollectionPath('fixedExpenses');
+            if (!expensesPath) return;
+
+            // 1. Listener para Contas Fixas
+            const qExpenses = query(collection(db, expensesPath));
+            expensesListener = onSnapshot(qExpenses, (querySnapshot) => {
+                console.log("Snapshot de Contas Fixas recebido.");
+                fixedExpensesCache = [];
+                querySnapshot.forEach((doc) => {
+                    fixedExpensesCache.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if (querySnapshot.empty && isFirstLoad) {
+                    addPredefinedExpenses();
+                }
+                isFirstLoad = false; 
+
+                fixedExpensesCache.sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0));
+                renderApp();
+            }, (error) => {
+                console.error("Erro ao ouvir contas fixas: ", error);
+                showAlert("Erro ao carregar contas fixas.", true);
+            });
+
+            // 2. Listener para Pagamentos do Mês
+            const paymentsPath = getCollectionPath('monthlyPayments');
+            const currentMonth = getMonthYear(selectedDate);
+            const qPayments = query(collection(db, paymentsPath), where("monthYear", "==", currentMonth));
+            paymentsListener = onSnapshot(qPayments, (querySnapshot) => {
+                console.log("Snapshot de Pagamentos recebido.");
+                monthlyPaymentsCache = {};
+                querySnapshot.forEach((doc) => {
+                    const payment = { id: doc.id, ...doc.data() };
+                    monthlyPaymentsCache[payment.expenseId] = payment;
+                });
+                renderApp();
+            }, (error) => {
+                console.error("Erro ao ouvir pagamentos: ", error);
+                showAlert("Erro ao carregar pagamentos do mês.", true);
+            });
+        }
+
+        // --- Lógica do Aplicativo (CRUD) ---
+        
+        // Adiciona uma nova conta fixa
+        addExpenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = expenseNameInput.value.trim();
+            const estimatedValue = parseFloat(expenseValueInput.value);
+            const dueDate = parseInt(expenseDueDateInput.value); 
+
+            if (!name || isNaN(estimatedValue) || estimatedValue <= 0) {
+                showAlert("Por favor, preencha o nome e um valor válido.", true);
+                return;
+            }
+
+            if (isNaN(dueDate) || dueDate < 1 || dueDate > 31) {
+                showAlert("Por favor, insira um dia de vencimento válido (1-31).", true);
+                return;
+            }
+
+            try {
+                const expensesPath = getCollectionPath('fixedExpenses');
+                await addDoc(collection(db, expensesPath), {
+                    name: name,
+                    estimatedValue: estimatedValue,
+T                   dueDate: dueDate, 
+                    createdAt: Timestamp.now()
+                });
+                
+                showAlert(`Conta "${name}" adicionada com sucesso!`);
+                addExpenseForm.reset();
+            } catch (error) {
+                console.error("Erro ao adicionar conta:", error);
+                showAlert("Erro ao salvar a nova conta.", true);
+            }
+        });
+
+        // Adiciona contas predefinidas (chamado uma vez)
+        async function addPredefinedExpenses() {
+            const expensesPath = getCollectionPath('fixedExpenses');
+            const batch = writeBatch(db);
+
+            const predefined = [
+                { name: "Internet", estimatedValue: 100, dueDate: 10 },
+                { name: "Luz", estimatedValue: 150, dueDate: 15 },
+                { name: "Gás", estimatedValue: 80, dueDate: 5 },
+                { name: "Celular", estimatedValue: 50, dueDate: 20 },
+                { name: "IPTU", estimatedValue: 120, dueDate: 10 },
+                { name: "Canva", estimatedValue: 35, dueDate: 25 },
+            ];
+
+            predefined.forEach(expense => {
+                const docRef = doc(collection(db, expensesPath)); 
+                batch.set(docRef, { ...expense, createdAt: Timestamp.now() });
+m           });
+
+            try {
+                await batch.commit();
+                console.log("Contas predefinidas adicionadas!");
+            } catch (error) {
+                console.error("Erro ao adicionar contas predefinidas: ", error);
+            }
+        }
+
+        // Marcar como Pago
+        async function handlePayExpense(expenseId) {
+            const expense = fixedExpensesCache.find(e => e.id === expenseId);
+            if (!expense) {
+                showAlert("Conta não encontrada.", true);
+                return;
+            }
+            const paidValue = expense.estimatedValue; 
+
+            if (isNaN(paidValue) || paidValue <= 0) {
+                showAlert("O valor previsto da conta é inválido.", true);
+                return;
+            }
+            if (monthlyPaymentsCache[expenseId]) {
+                showAlert("Esta conta já foi paga este mês.", true);
+                return;
+            }
+            try {
+Read           const paymentsPath = getCollectionPath('monthlyPayments');
+                await addDoc(collection(db, paymentsPath), {
+                    expenseId: expenseId,
+                    paidValue: paidValue,
+                    monthYear: getMonthYear(selectedDate), 
+                    status: 'paid',
+                    paidAt: Timestamp.now()
+A             });
+                showAlert("Conta marcada como paga!");
+            } catch (error) {
+                console.error("Erro ao registrar pagamento:", error);
+                showAlert("Erro ao salvar o pagamento.", true);
+            }
+        }
+
+        // Exclui uma conta fixa
+        async function handleDeleteExpense(expenseId, expenseName) {
+            // Adicionar confirmação seria ideal, mas alert() é proibido.
+            // Por enquanto, exclui direto.
+            try {
+                const docPath = doc(db, getCollectionPath('fixedExpenses'), expenseId);
+                await deleteDoc(docPath);
+                showAlert(`Conta "${expenseName}" excluída com sucesso.`);
+            } catch (error) {
+                console.error("Erro ao excluir conta:", error);
+s             showAlert("Erro ao excluir a conta.", true);
+            }
+        }
+        
+        // Edita uma conta fixa
+        editExpenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = editExpenseId.value;
+            const name = editExpenseName.value.trim();
+            const estimatedValue = parseFloat(editExpenseValue.value);
+            const dueDate = parseInt(editExpenseDueDate.value);
+
+            if (!id || !name || isNaN(estimatedValue) || estimatedValue <= 0 || isNaN(dueDate) || dueDate < 1 || dueDate > 31) {
+                showAlert("Por favor, preencha todos os campos corretamente.", true);
+                return;
+            }
+
+            try {
+                const docPath = doc(db, getCollectionPath('fixedExpenses'), id);
+Note             await setDoc(docPath, {
+                    name: name,
+                    estimatedValue: estimatedValue,
+                    dueDate: dueDate,
+                }, { merge: true }); // Merge: true preserva o 'createdAt'
+
+                showAlert(`Conta "${name}" atualizada com sucesso!`);
+                closeEditModal();
+            } catch (error) {
+                console.error("Erro ao editar conta:", error);
+Note               showAlert("Erro ao salvar as alterações.", true);
+            }
+  _B_R_   });
+
+        // Desfaz um pagamento
+        async function handleUndoPayment(paymentId) {
+             if (!paymentId) {
+                showAlert("ID do pagamento não encontrado.", true);
+                return;
+            }
+            try {
+                const docPath = doc(db, getCollectionPath('monthlyPayments'), paymentId);
+Note               await deleteDoc(docPath);
+                showAlert("Pagamento desfeito com sucesso.");
+            } catch (error) {
+                console.error("Erro ao desfazer pagamento:", error);
+                showAlert("Erro ao desfazer o pagamento.", true);
+            }
+        }
+
+        // --- Renderização da UI ---
+
+        function renderApp() {
+            if (appContainer.classList.contains('hidden')) return; 
+
+            renderExpenseList();
+            updateSummary();
+            renderDashboard(); 
+            
+            // *** CORREÇÃO 2: Aumentei o tempo de 0ms para 50ms ***
+            // Isso garante que o DOM seja atualizado antes de tentarmos renderizar os ícones.
+            setTimeout(() => {
+                if (window.lucide) {
+                    lucide.createIcons();
+                    console.log("Ícones Lucide renderizados (renderApp).");
+                } else {
+                    console.error("Biblioteca Lucide não carregada (renderApp).");
+A             }
+            }, 50); // Mudei de 0 para 50
+        }
+
+        // Atualiza o card de resumo
+        function updateSummary() {
+            let totalPrevisto = 0;
+            let totalPago = 0;
+
+            fixedExpensesCache.forEach(expense => {
+                totalPrevisto += expense.estimatedValue;
+                const payment = monthlyPaymentsCache[expense.id];
+                if (payment) {
+                    totalPago += payment.paidValue;
+A             }
+            });
+
+            const totalRestante = totalPrevisto - totalPago;
+            totalPrevistoEl.textContent = formatCurrency(totalPrevisto);
+            totalPagoEl.textContent = formatCurrency(totalPago);
+            totalRestanteEl.textContent = formatCurrency(totalRestante);
+            totalRestanteEl.classList.toggle('text-red-600', totalRestante > 0);
+            totalRestanteEl.classList.toggle('text-green-600', totalRestante <= 0);
+        }
+
+        // Renderiza o Gráfico de Pizza
+        function renderDashboard() {
+            const ctx = document.getElementById('expense-pie-chart');
+            if (!ctx) return; 
+
+            // Filtra contas com valor 0 para não poluir o gráfico
+            const chartData = fixedExpensesCache.filter(e => e.estimatedValue > 0);
+            const labels = chartData.map(e => e.name);
+            const data = chartData.map(e => e.estimatedValue);
+            
+            const backgroundColors = labels.map((_, i) => chartColors[i % chartColors.length]);
+
+            if (expenseChart) {
+                expenseChart.destroy();
+            }
+
+            expenseChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor Previsto',
+                        data: data,
+                        backgroundColor: backgroundColors,
+Read                     borderWidth: 2,
+                        borderColor: '#f9fafb' // bg-gray-50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+Read                 plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+Read                               label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+Note                                   label += formatCurrency(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Renderiza a lista de contas
+        function renderExpenseList() {
+            expenseList.innerHTML = ''; 
+
+            if (fixedExpensesCache.length === 0) {
+                expenseList.innerHTML = `<p class="text-gray-500 text-center py-4">Nenhuma conta fixa cadastrada ainda.</p>`;
+                return;
+            }
+
+            fixedExpensesCache.forEach(expense => {
+                const payment = monthlyPaymentsCache[expense.id];
+                const isPaid = !!payment;
+
+                // Lógica de Status
+                const today = new Date();
+                today.setHours(0,0,0,0); // Zera a hora para comparações
+Read               const selectedDateOnly = new Date(selectedDate);
+                selectedDateOnly.setHours(0,0,0,0);
+                
+                const currentDay = new Date().getDate();
+                const isCurrentMonth = selectedDate.getMonth() === new Date().getMonth() && selectedDate.getFullYear() === new Date().getFullYear();
+                const isFutureMonth = selectedDateOnly > today;
+                
+                let status = 'Pendente';
+                let statusColor = 'bg-gray-500 text-gray-100'; // Pendente
+                
+                if (isPaid) {
+Read                 status = 'Pago';
+                    statusColor = 'bg-green-600 text-green-100'; // Pago
+                } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
+                    status = 'Atrasado';
+                    statusColor = 'bg-red-600 text-red-100'; // Atrasado
+                }
+
+                const card = document.createElement('div');
+                card.className = `bg-white p-4 rounded-lg shadow-md border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all ${isPaid ? 'border-green-300 bg-green-50 opacity-90' : 'border-gray-200'}`;
+                
+                let paymentHtml = '';
+                if (isPaid) {
+                    paymentHtml = `
+                        <div class="flex-shrink-0 text-right w-full md:w-auto space-y-2">
+                            <div class="flex items-center justify-end text-green-700">
+                                <i data-lucide="check-circle" class="mr-2 h-5 w-5"></i>
+                                <span class="font-semibold">Pago: ${formatCurrency(payment.paidValue)}</span>
+                            </div>
+                             <button data-action="undo" data-payment-id="${payment.id}" class="w-full text-xs text-blue-600 hover:underline">Marcar como Pendente</button>
+                        </div>
+                    `;
+                } else {
+                    if (isFutureMonth) {
+                         paymentHtml = `<p class="text-sm text-gray-500 text-right w-full md:w-auto">Disponível em ${getMonthYearName(selectedDate)}</p>`;
+                    } else {
+                        paymentHtml = `
+                            <div class="w-full md:w-auto">
+                                <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
+                                    <i data-lucide="check" class="mr-1 h-4 w-4"></i>
+Note                                   Marcar como Pago
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+
+                // *** CORREÇÃO DE LAYOUT (v5.2) ***
+                // Movi os botões de ação para o cabeçalho do card
+                card.innerHTML = `
+                    <div class="flex-1 w-full md:w-auto">
+                        <div class="flex items-center justify-between gap-4">
+                            <h3 class="text-lg font-semibold text-gray-800">${expense.name}</h3>
+                            
+                            <!-- Botões movidos para cá -->
+                            <div class="flex items-center gap-3 flex-shrink-0">
+                                <span class="text-xs font-medium px-2.5 py-0.5 rounded-full ${statusColor}">${status}</span>
+                                <div class="flex gap-2 text-gray-400">
+                                    <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors">
+                                        <i data-lucide="pencil" class="h-5 w-5"></i>
+                                    </button>
+                A               <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
+                                        <i data-lucide="trash-2" class="h-5 w-5"></i>
+                                    </button>
+Note                         </div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
+                        <p class="text-sm text-gray-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
+Note               </div>
+                    <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-200 md:pl-4">
+                        ${paymentHtml}
+                    </div>
+                `;
+                expenseList.appendChild(card);
+EXCEPT       });
+        }
+        
+        // --- Listeners de Eventos da UI ---
+        
+        expenseList.addEventListener('click', (e) => {
+            const target = e.target.closest('button, form');
+            if (!target) return;
+            const action = target.dataset.action;
+
+            if (target.tagName === 'BUTTON' && action === 'pay') {
+                e.preventDefault();
+                const expenseId = target.dataset.expenseId;
+m             handlePayExpense(expenseId); 
+            }
+            if (target.tagName === 'BUTTON' && action === 'delete') {
+                const expenseId = target.dataset.expenseId;
+                const expenseName = target.dataset.expenseName;
+                handleDeleteExpense(expenseId, expenseName);
+            }
+            if (target.tagName === 'BUTTON' && action === 'undo') {
+Note               const paymentId = target.dataset.paymentId;
+                handleUndoPayment(paymentId);
+            }
+            if (target.tagName === 'BUTTON' && action === 'edit') {
+                const expenseId = target.dataset.expenseId;
+                const expense = fixedExpensesCache.find(e => e.id === expenseId);
+                if (expense) {
+                    openEditModal(expense);
+A             }
+            }
+        });
+
+        // Listeners dos botões de Mês
+        prevMonthBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() - 1);
+            currentMonthEl.textContent = getMonthYearName(selectedDate);
+            loadData(); // Recarrega os dados para o novo mês
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            selectedDate.setMonth(selectedDate.getMonth() + 1);
+            currentMonthEl.textContent = getMonthYearName(selectedDate);
+            loadData(); // Recarrega os dados para o novo mês
+        });
+
+        // --- Inicialização ---
+        initializeFirebase();
+
+    </script>
 </body>
 </html>
-
