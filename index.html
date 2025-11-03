@@ -100,7 +100,7 @@
                 <p class="text-center text-sm text-gray-600 mt-4">
                     Já tem uma conta? 
                     <button type="button" id="show-login" class="font-medium text-blue-600 hover:underline">Faça Login</button>
-s              </p>
+                </p>
             </form>
 
         </div>
@@ -153,7 +153,7 @@ s              </p>
                 <h2 class="text-2xl font-semibold mb-4">Adicionar Nova Conta Fixa</h2>
                 <form id="add-expense-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div class="md:col-span-1">
-          _B_R_               <label for="expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
+                        <label for="expense-name" class="block text-sm font-medium text-gray-700">Nome da Conta</label>
                         <input type="text" id="expense-name" placeholder="Ex: Aluguel, Luz, Internet" class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div class="md:col-span-1">
@@ -177,7 +177,7 @@ s              </p>
             <!-- Seção da Lista de Contas -->
             <section id="expense-list-section">
                 <!-- Navegação de Mês -->
-              _B_R_ <div class="flex justify-between items-center mb-4">
+                <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-semibold">Minhas Contas</h2>
                     <div class="flex items-center gap-2">
                         <button id="prev-month-btn" class="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors">
@@ -214,7 +214,7 @@ s              </p>
                 Fechar
             </button>
         </div>
-  D_ </div>
+    </div>
 
     <!-- Modal de Edição -->
     <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
@@ -238,14 +238,14 @@ s              </p>
                 </div>
                 <div class="mt-6 flex gap-4">
                     <button type="button" id="edit-cancel-btn" class="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:outline-none">
-e                     Cancelar
+                        Cancelar
                     </button>
                     <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 focus:outline-none">
                         Salvar Alterações
                     </button>
                 </div>
             </form>
-md       </div>
+        </div>
     </div>
 
 
@@ -656,7 +656,7 @@ md       </div>
                 await addDoc(collection(db, expensesPath), {
                     name: name,
                     estimatedValue: estimatedValue,
-T                   dueDate: dueDate, 
+                    dueDate: dueDate, 
                     createdAt: Timestamp.now()
                 });
                 
@@ -685,7 +685,7 @@ T                   dueDate: dueDate,
             predefined.forEach(expense => {
                 const docRef = doc(collection(db, expensesPath)); 
                 batch.set(docRef, { ...expense, createdAt: Timestamp.now() });
-m           });
+            });
 
             try {
                 await batch.commit();
@@ -713,14 +713,14 @@ m           });
                 return;
             }
             try {
-Read           const paymentsPath = getCollectionPath('monthlyPayments');
+                const paymentsPath = getCollectionPath('monthlyPayments');
                 await addDoc(collection(db, paymentsPath), {
                     expenseId: expenseId,
                     paidValue: paidValue,
                     monthYear: getMonthYear(selectedDate), 
                     status: 'paid',
                     paidAt: Timestamp.now()
-A             });
+                });
                 showAlert("Conta marcada como paga!");
             } catch (error) {
                 console.error("Erro ao registrar pagamento:", error);
@@ -738,7 +738,7 @@ A             });
                 showAlert(`Conta "${expenseName}" excluída com sucesso.`);
             } catch (error) {
                 console.error("Erro ao excluir conta:", error);
-s             showAlert("Erro ao excluir a conta.", true);
+                showAlert("Erro ao excluir a conta.", true);
             }
         }
         
@@ -757,7 +757,7 @@ s             showAlert("Erro ao excluir a conta.", true);
 
             try {
                 const docPath = doc(db, getCollectionPath('fixedExpenses'), id);
-Note             await setDoc(docPath, {
+                await setDoc(docPath, {
                     name: name,
                     estimatedValue: estimatedValue,
                     dueDate: dueDate,
@@ -767,9 +767,9 @@ Note             await setDoc(docPath, {
                 closeEditModal();
             } catch (error) {
                 console.error("Erro ao editar conta:", error);
-Note               showAlert("Erro ao salvar as alterações.", true);
+                showAlert("Erro ao salvar as alterações.", true);
             }
-  _B_R_   });
+        });
 
         // Desfaz um pagamento
         async function handleUndoPayment(paymentId) {
@@ -779,7 +779,7 @@ Note               showAlert("Erro ao salvar as alterações.", true);
             }
             try {
                 const docPath = doc(db, getCollectionPath('monthlyPayments'), paymentId);
-Note               await deleteDoc(docPath);
+                await deleteDoc(docPath);
                 showAlert("Pagamento desfeito com sucesso.");
             } catch (error) {
                 console.error("Erro ao desfazer pagamento:", error);
@@ -804,7 +804,7 @@ Note               await deleteDoc(docPath);
                     console.log("Ícones Lucide renderizados (renderApp).");
                 } else {
                     console.error("Biblioteca Lucide não carregada (renderApp).");
-A             }
+                }
             }, 50); // Mudei de 0 para 50
         }
 
@@ -818,7 +818,7 @@ A             }
                 const payment = monthlyPaymentsCache[expense.id];
                 if (payment) {
                     totalPago += payment.paidValue;
-A             }
+                }
             });
 
             const totalRestante = totalPrevisto - totalPago;
@@ -853,14 +853,14 @@ A             }
                         label: 'Valor Previsto',
                         data: data,
                         backgroundColor: backgroundColors,
-Read                     borderWidth: 2,
+                        borderWidth: 2,
                         borderColor: '#f9fafb' // bg-gray-50
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-Read                 plugins: {
+                    plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
@@ -871,13 +871,13 @@ Read                 plugins: {
                         },
                         tooltip: {
                             callbacks: {
-Read                               label: function(context) {
+                                label: function(context) {
                                     let label = context.label || '';
                                     if (label) {
                                         label += ': ';
                                     }
                                     if (context.parsed !== null) {
-Note                                   label += formatCurrency(context.parsed);
+                                        label += formatCurrency(context.parsed);
                                     }
                                     return label;
                                 }
@@ -904,7 +904,7 @@ Note                                   label += formatCurrency(
                 // Lógica de Status
                 const today = new Date();
                 today.setHours(0,0,0,0); // Zera a hora para comparações
-Read               const selectedDateOnly = new Date(selectedDate);
+                const selectedDateOnly = new Date(selectedDate);
                 selectedDateOnly.setHours(0,0,0,0);
                 
                 const currentDay = new Date().getDate();
@@ -915,7 +915,7 @@ Read               const selectedDateOnly = new Date(selectedDate);
                 let statusColor = 'bg-gray-500 text-gray-100'; // Pendente
                 
                 if (isPaid) {
-Read                 status = 'Pago';
+                    status = 'Pago';
                     statusColor = 'bg-green-600 text-green-100'; // Pago
                 } else if (isCurrentMonth && (expense.dueDate || 32) < currentDay) {
                     status = 'Atrasado';
@@ -944,7 +944,7 @@ Read                 status = 'Pago';
                             <div class="w-full md:w-auto">
                                 <button data-action="pay" data-expense-id="${expense.id}" class="w-full bg-green-600 text-white px-4 py-2 rounded-md shadow-sm font-medium hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm">
                                     <i data-lucide="check" class="mr-1 h-4 w-4"></i>
-Note                                   Marcar como Pago
+                                    Marcar como Pago
                                 </button>
                             </div>
                         `;
@@ -965,21 +965,21 @@ Note                                   Marcar como Pago
                                     <button data-action="edit" data-expense-id="${expense.id}" class="hover:text-blue-500 transition-colors">
                                         <i data-lucide="pencil" class="h-5 w-5"></i>
                                     </button>
-                A               <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
+                                    <button data-action="delete" data-expense-id="${expense.id}" data-expense-name="${expense.name}" class="hover:text-red-500 transition-colors">
                                         <i data-lucide="trash-2" class="h-5 w-5"></i>
                                     </button>
-Note                         </div>
+                                </div>
                             </div>
                         </div>
                         <p class="text-sm text-gray-600 mt-1">Previsto: ${formatCurrency(expense.estimatedValue)}</p>
                         <p class="text-sm text-gray-500">Vencimento: Dia ${expense.dueDate || 'N/D'}</p>
-Note               </div>
+                    </div>
                     <div class="w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-200 md:pl-4">
                         ${paymentHtml}
                     </div>
                 `;
                 expenseList.appendChild(card);
-EXCEPT       });
+            });
         }
         
         // --- Listeners de Eventos da UI ---
@@ -992,7 +992,7 @@ EXCEPT       });
             if (target.tagName === 'BUTTON' && action === 'pay') {
                 e.preventDefault();
                 const expenseId = target.dataset.expenseId;
-m             handlePayExpense(expenseId); 
+                handlePayExpense(expenseId); 
             }
             if (target.tagName === 'BUTTON' && action === 'delete') {
                 const expenseId = target.dataset.expenseId;
@@ -1000,7 +1000,7 @@ m             handlePayExpense(expenseId);
                 handleDeleteExpense(expenseId, expenseName);
             }
             if (target.tagName === 'BUTTON' && action === 'undo') {
-Note               const paymentId = target.dataset.paymentId;
+                const paymentId = target.dataset.paymentId;
                 handleUndoPayment(paymentId);
             }
             if (target.tagName === 'BUTTON' && action === 'edit') {
@@ -1008,7 +1008,7 @@ Note               const paymentId = target.dataset.paymentId;
                 const expense = fixedExpensesCache.find(e => e.id === expenseId);
                 if (expense) {
                     openEditModal(expense);
-A             }
+                }
             }
         });
 
@@ -1031,3 +1031,4 @@ A             }
     </script>
 </body>
 </html>
+
